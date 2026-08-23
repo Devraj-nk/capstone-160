@@ -1,0 +1,18 @@
+fastapi>=0.110,<1
+uvicorn[standard]>=0.29,<1
+httpx>=0.27,<1
+pydantic>=2.7,<3
+motor>=3.4,<4
+
+# preprocessing
+langdetect>=1.0,<2
+emoji>=2.11,<3
+ftfy>=6.2,<7
+
+# analysis / summarization
+transformers>=4.40,<5
+torch>=2.2,<3
+sentencepiece>=0.2,<1
+
+# evidence
+sentence-transformers>=3.0,<4

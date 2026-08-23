@@ -1,0 +1,5 @@
+my_work.txt
+__pycache__/
+*.pyc
+.venv/
+.env

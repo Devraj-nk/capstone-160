@@ -1,0 +1,61 @@
+post_id,text,timestamp,source,language,user_id,followers_count,verified,location,retweet_count,like_count
+1,"Flood in my area, need help urgently!",2026-04-21T21:10:01Z,twitter,en,usr_101,120,false,Bangalore,12,45
+2,"भारी बारिश के कारण सड़क बंद है, मदद चाहिए",2026-04-21T21:10:03Z,twitter,hi,usr_102,340,false,Delhi,5,20
+3,"Power outage since morning, no updates from authorities",2026-04-21T21:10:06Z,reddit,en,usr_103,89,false,Mumbai,2,10
+4,"ನಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ನೀರು ತುಂಬಿದೆ, ಸಹಾಯ ಬೇಕು",2026-04-21T21:10:08Z,twitter,kn,usr_104,560,true,Bangalore,25,80
+5,"Fire broke out near market, people trapped!",2026-04-21T21:10:10Z,twitter,en,usr_105,1020,true,Chennai,40,150
+6,"Water shortage in our locality for 3 days",2026-04-21T21:10:12Z,reddit,en,usr_106,76,false,Hyderabad,3,15
+7,"Accident on highway, traffic jam for hours",2026-04-21T21:10:15Z,twitter,en,usr_107,210,false,Pune,8,33
+8,"कोई एम्बुलेंस उपलब्ध नहीं है, स्थिति गंभीर है",2026-04-21T21:10:18Z,twitter,hi,usr_108,430,true,Delhi,18,60
+9,"Garbage not collected, causing health issues",2026-04-21T21:10:20Z,reddit,en,usr_109,65,false,Kolkata,1,5
+10,"Tourist place overcrowded, no safety measures",2026-04-21T21:10:22Z,twitter,en,usr_110,150,false,Goa,6,25
+11,"Heavy landslide reported in hill area",2026-04-21T21:10:25Z,twitter,en,usr_111,890,true,Shimla,30,120
+12,"ಬೆಂಕಿ ಅವಘಡ ಸಂಭವಿಸಿದೆ, ತಕ್ಷಣ ನೆರವು ಅಗತ್ಯ",2026-04-21T21:10:28Z,twitter,kn,usr_112,300,false,Mysore,10,40
+13,"No police response despite multiple complaints",2026-04-21T21:10:30Z,reddit,en,usr_113,54,false,Delhi,2,12
+14,"Flood water entering homes, situation worsening",2026-04-21T21:10:33Z,twitter,en,usr_114,670,true,Patna,22,90
+15,"Hospital overcrowded, no beds available",2026-04-21T21:10:36Z,twitter,en,usr_115,980,true,Mumbai,35,140
+16,"पानी की समस्या बहुत गंभीर हो गई है",2026-04-21T21:10:38Z,twitter,hi,usr_116,210,false,Jaipur,7,28
+17,"Road completely damaged after rain",2026-04-21T21:10:40Z,reddit,en,usr_117,33,false,Chandigarh,1,6
+18,"Tourists stranded due to sudden weather change",2026-04-21T21:10:43Z,twitter,en,usr_118,410,false,Manali,9,35
+19,"Electric wires fallen, dangerous situation",2026-04-21T21:10:45Z,twitter,en,usr_119,500,true,Bangalore,15,55
+20,"ಸರ್ಕಾರಿ ಸಹಾಯ ಇನ್ನೂ ಬಂದಿಲ್ಲ",2026-04-21T21:10:48Z,twitter,kn,usr_120,275,false,Hubli,6,22
+21,"Severe flooding near river bank, people evacuating",2026-04-21T21:11:01Z,twitter,en,usr_121,1450,true,Patna,55,210
+22,"पुल टूट गया है, यातायात बंद है",2026-04-21T21:11:03Z,twitter,hi,usr_122,320,false,Varanasi,12,40
+23,"No drinking water supply since yesterday",2026-04-21T21:11:05Z,reddit,en,usr_123,78,false,Hyderabad,3,14
+24,"Heavy rain causing traffic congestion everywhere",2026-04-21T21:11:07Z,twitter,en,usr_124,210,false,Bangalore,9,31
+25,"ಬೆಂಗಳೂರಿನಲ್ಲಿ ಮಳೆ ಜಾಸ್ತಿ, ರಸ್ತೆಗಳು ಮುಳುಗಿವೆ",2026-04-21T21:11:09Z,twitter,kn,usr_125,500,false,Bangalore,18,60
+26,"Fire accident reported in apartment complex",2026-04-21T21:11:12Z,twitter,en,usr_126,980,true,Mumbai,40,160
+27,"Hospital emergency ward is full, no space left",2026-04-21T21:11:14Z,twitter,en,usr_127,870,true,Chennai,33,120
+28,"Garbage piling up, causing foul smell",2026-04-21T21:11:16Z,reddit,en,usr_128,45,false,Kolkata,1,6
+29,"कोई मदद नहीं मिल रही है, स्थिति खराब है",2026-04-21T21:11:18Z,twitter,hi,usr_129,410,false,Delhi,14,48
+30,"Road blocked due to fallen trees",2026-04-21T21:11:20Z,twitter,en,usr_130,260,false,Pune,7,25
+31,"Tourist stuck due to landslide in hill station",2026-04-21T21:11:23Z,twitter,en,usr_131,630,false,Manali,15,52
+32,"Water logging everywhere after overnight rain",2026-04-21T21:11:25Z,twitter,en,usr_132,300,false,Mumbai,10,35
+33,"ನೀರಿನ ಸಮಸ್ಯೆ ತೀವ್ರವಾಗಿದೆ",2026-04-21T21:11:27Z,twitter,kn,usr_133,190,false,Mysore,5,18
+34,"Electricity gone for 10 hours, no response",2026-04-21T21:11:30Z,reddit,en,usr_134,60,false,Hyderabad,2,9
+35,"Massive fire in warehouse, smoke everywhere",2026-04-21T21:11:33Z,twitter,en,usr_135,1500,true,Delhi,60,240
+36,"पानी घरों में घुस गया है, लोग परेशान हैं",2026-04-21T21:11:35Z,twitter,hi,usr_136,380,false,Patna,16,58
+37,"Road accident causing long traffic jam",2026-04-21T21:11:37Z,twitter,en,usr_137,220,false,Chandigarh,8,27
+38,"No sanitation workers in our area for weeks",2026-04-21T21:11:40Z,reddit,en,usr_138,50,false,Jaipur,1,5
+39,"Tourism site overcrowded, unsafe conditions",2026-04-21T21:11:42Z,twitter,en,usr_139,410,false,Goa,11,36
+40,"ಬೆಂಕಿ ಅವಘಡದಿಂದ ಜನರು ಹೊರಗೆ ಓಡುತ್ತಿದ್ದಾರೆ",2026-04-21T21:11:45Z,twitter,kn,usr_140,720,true,Bangalore,22,85
+41,"Bridge collapse reported, rescue teams needed",2026-04-21T21:11:48Z,twitter,en,usr_141,1100,true,Assam,48,190
+42,"No buses running due to heavy rain",2026-04-21T21:11:50Z,twitter,en,usr_142,180,false,Kochi,6,20
+43,"Flood water rising rapidly, urgent help needed",2026-04-21T21:11:52Z,twitter,en,usr_143,950,true,Patna,37,140
+44,"लोगों को सुरक्षित स्थान पर भेजा जा रहा है",2026-04-21T21:11:55Z,twitter,hi,usr_144,600,true,Delhi,20,70
+45,"Power fluctuation damaging appliances",2026-04-21T21:11:58Z,reddit,en,usr_145,75,false,Mumbai,2,10
+46,"Garbage burning causing pollution issues",2026-04-21T21:12:01Z,twitter,en,usr_146,210,false,Kolkata,7,24
+47,"Tourist buses stuck due to road closure",2026-04-21T21:12:04Z,twitter,en,usr_147,390,false,Manali,12,40
+48,"Water supply pipeline broken",2026-04-21T21:12:06Z,twitter,en,usr_148,170,false,Hyderabad,5,18
+49,"ನಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ವಿದ್ಯುತ್ ಇಲ್ಲ",2026-04-21T21:12:09Z,twitter,kn,usr_149,260,false,Hubli,6,22
+50,"Firefighters struggling to control blaze",2026-04-21T21:12:12Z,twitter,en,usr_150,1300,true,Mumbai,42,170
+51,"Heavy winds causing damage to buildings",2026-04-21T21:12:15Z,twitter,en,usr_151,480,false,Chennai,14,50
+52,"कोई अधिकारी जवाब नहीं दे रहा है",2026-04-21T21:12:18Z,twitter,hi,usr_152,300,false,Delhi,10,33
+53,"Hospital lacks oxygen supply",2026-04-21T21:12:21Z,twitter,en,usr_153,1050,true,Delhi,36,130
+54,"Tourists complaining about poor facilities",2026-04-21T21:12:24Z,reddit,en,usr_154,55,false,Goa,2,8
+55,"Road submerged completely",2026-04-21T21:12:27Z,twitter,en,usr_155,220,false,Bangalore,9,29
+56,"ಬೆಂಗಳೂರಿನಲ್ಲಿ ಟ್ರಾಫಿಕ್ ಜಾಮ್ ಭಾರೀ ಮಟ್ಟದಲ್ಲಿ ಇದೆ",2026-04-21T21:12:30Z,twitter,kn,usr_156,350,false,Bangalore,11,38
+57,"Emergency services delayed response",2026-04-21T21:12:33Z,twitter,en,usr_157,780,true,Pune,25,95
+58,"Flood relief camps being set up",2026-04-21T21:12:36Z,twitter,en,usr_158,920,true,Assam,30,110
+59,"Residents protesting due to water shortage",2026-04-21T21:12:39Z,reddit,en,usr_159,65,false,Chennai,3,12
+60,"Accident victims waiting for ambulance",2026-04-21T21:12:42Z,twitter,en,usr_160,890,true,Mumbai,28,100

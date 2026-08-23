@@ -87,6 +87,50 @@ The system is organized into five layers: **Ingestion → Preprocessing → AI A
 
 Currently in the data preprocessing, base model training, and evaluation stage (Capstone Phase 2). Design docs and architecture diagrams live in [docs/](docs/).
 
+## Project Structure
+
+Standard 3-tier split: **React** (presentation) → **FastAPI** (application/API) → **MongoDB** (storage), in explicit `backend/` / `frontend/` folders. The backend is a *modular monolith* — a single FastAPI app, one process — with every HLD layer as its own router (`backend/app/routers/<layer>.py`) so a member can own a layer's code without needing to run or coordinate a separate service for it. The frontend covers the two human-facing HLD screens. Full rationale in [docs/TECH_STACK.md](docs/TECH_STACK.md).
+
+```
+capstone-160/
+├── backend/                  # single FastAPI app (modular monolith)
+│   ├── app/
+│   │   ├── main.py            # app instance, CORS, router registration
+│   │   ├── db.py               # MongoDB (motor) client
+│   │   ├── schemas/             # shared Pydantic models
+│   │   ├── analysis/             # sentiment / need_detection / fake_news / priority_scoring helpers
+│   │   └── routers/
+│   │       ├── ingestion.py      # done — POST /ingestion/ingest
+│   │       ├── queue.py           # done — in-memory FIFO queue
+│   │       ├── preprocessing.py    # scaffold — text cleaning, language detection
+│   │       ├── analysis.py          # scaffold — sentiment, need detection, fake-news, priority
+│   │       ├── summarization.py      # scaffold — situation summarization
+│   │       ├── evidence.py            # scaffold — evidence extraction + evidence store
+│   │       └── situations.py           # scaffold — API the frontend calls (review + analytics)
+│   └── tools/                 # simulator / consumer scripts (not part of the API process)
+├── frontend/                  # React + Vite
+│   └── src/pages/
+│       ├── ReviewPage.jsx      # scaffold — Human Review Interface
+│       └── DashboardPage.jsx   # scaffold — Situation Routing Dashboard
+└── docs/                     # architecture diagrams, tech stack notes, ESA decks
+```
+
+Run:
+
+```bash
+# backend — one process, one port
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+
+# frontend — separate dev server, proxies API calls to the backend
+cd frontend
+npm install
+npm run dev   # http://localhost:5173
+```
+
+Endpoint stubs currently pass data through unchanged or return placeholder values — swap in the real model/logic per router's TODOs. `backend/app/routers/situations.py` is the one new piece with no earlier equivalent: it's the API contract the React frontend actually calls (`GET /situations`, `POST /situations/{id}/decision`, `GET /analytics/summary`), backed by MongoDB.
+
 ## Team
 
 Project ID 160 — Guide: **Dr. Saritha**
