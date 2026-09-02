@@ -16,10 +16,10 @@ torch>=2.2,<3
 sentencepiece>=0.2,<1
 
 # evidence
-sentence-transformers>=3.0,<4
+sentence-transformers>=3.0,<6
 
 # testing
 pytest>=8.0,<9
 mongomock-motor>=0.0.34,<1
 typing_extensions>=4.10,<5
-httpx2>=0.1,<1  # required by starlette.testclient (TestClient) on newer starlette
+httpx2>=0.1,<1; python_version>="3.14"  # only needed by starlette.testclient on Python 3.14+; that package doesn't install on older Pythons and isn't needed there
