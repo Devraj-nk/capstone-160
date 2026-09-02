@@ -129,6 +129,15 @@ npm install
 npm run dev   # http://localhost:5173
 ```
 
+Test the pipeline as currently implemented (`backend/tests/`, no real network/MongoDB
+needed — Mongo is mocked in-memory): `cd backend && python -m pytest -v` (use
+`python -m pytest`, not a bare `pytest` — with more than one Python install, a
+`pytest` on PATH can silently resolve to a different one than `pip install` used,
+which looks like the packages "aren't installed" when they are). Or open VS Code's
+Testing panel and click ▶ — test discovery is pre-configured in `.vscode/settings.json`,
+but make sure the interpreter selected in VS Code's status bar is the same one you
+ran `pip install -r requirements.txt` with.
+
 Endpoint stubs currently pass data through unchanged or return placeholder values — swap in the real model/logic per router's TODOs. `backend/app/routers/situations.py` is the one new piece with no earlier equivalent: it's the API contract the React frontend actually calls (`GET /situations`, `POST /situations/{id}/decision`, `GET /analytics/summary`), backed by MongoDB.
 
 ## Team

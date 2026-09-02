@@ -17,3 +17,9 @@ sentencepiece>=0.2,<1
 
 # evidence
 sentence-transformers>=3.0,<4
+
+# testing
+pytest>=8.0,<9
+mongomock-motor>=0.0.34,<1
+typing_extensions>=4.10,<5
+httpx2>=0.1,<1  # required by starlette.testclient (TestClient) on newer starlette
