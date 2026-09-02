@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Console — Cluster Verification</title>
+<style>
+  :root{
+    --bg:#F3F7FB;
+    --bg-elev:#FFFFFF;
+    --bg-elev-2:#E9F1F9;
+    --bg-elev-3:#DCE9F6;
+    --border:#DCE6F2;
+    --border-soft:#E5EDF6;
+    --text:#1B2A3D;
+    --text-dim:#5C6B80;
+    --text-faint:#93A2B8;
+    --critical:#E0524B;
+    --critical-dim:rgba(224,82,75,0.12);
+    --high:#DB9A2C;
+    --high-dim:rgba(219,154,44,0.13);
+    --med:#2E7FC1;
+    --med-dim:rgba(46,127,193,0.12);
+    --low:#8B98AC;
+    --verified:#1E9E7C;
+    --verified-dim:rgba(30,158,124,0.13);
+    --fake:#C9457A;
+    --fake-dim:rgba(201,69,122,0.12);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Inter, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;}
+  body{
+    background-image:
+      radial-gradient(circle at 15% -10%, rgba(46,127,193,0.08), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(30,158,124,0.05), transparent 35%);
+  }
+  .app{display:flex;flex-direction:column;height:100vh;min-height:640px;}
+
+  /* ===== TOP BAR ===== */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;border-bottom:1px solid var(--border-soft);
+    background:var(--bg-elev);
+    box-shadow:0 1px 0 rgba(0,0,0,0.02), 0 2px 12px rgba(58,52,43,0.04);
+    flex-shrink:0;
+  }
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .brand{display:flex;align-items:center;gap:9px;}
+  .brand-mark{
+    width:9px;height:9px;border-radius:50%;background:var(--critical);
+    box-shadow:0 0 0 3px var(--critical-dim);
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+  .brand-text{font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text);}
+  .brand-sub{font-size:11px;color:var(--text-faint);letter-spacing:0.06em;font-family:var(--mono);}
+  .topbar-right{display:flex;align-items:center;gap:18px;}
+  .stat-chip{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;}
+  .stat-chip .num{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);}
+  .stat-chip .lbl{font-size:10px;color:var(--text-faint);letter-spacing:0.08em;text-transform:uppercase;}
+  .divider-v{width:1px;height:26px;background:var(--border);}
+  .reviewer{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border:1px solid var(--border);border-radius:24px;background:var(--bg-elev-2);}
+  .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--med),var(--verified));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
+  .reviewer-name{font-size:12px;color:var(--text-dim);}
+
+  /* ===== MAIN LAYOUT ===== */
+  .main{display:flex;flex:1;min-height:0;}
+
+  /* QUEUE */
+  .queue{
+    width:308px;flex-shrink:0;border-right:1px solid var(--border-soft);
+    display:flex;flex-direction:column;background:var(--bg-elev-2);
+    overflow:hidden;
+  }
+  .queue-head{padding:16px 18px 10px;flex-shrink:0;}
+  .queue-head h2{margin:0 0 3px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);font-weight:700;}
+  .queue-head p{margin:0;font-size:11px;color:var(--text-faint);}
+  .queue-list{overflow-y:auto;flex:1;padding:4px 10px 16px;}
+  .qcard{
+    padding:13px 13px;border-radius:14px;margin-bottom:7px;cursor:pointer;
+    border:1px solid transparent;transition:background 0.12s, border-color 0.12s, box-shadow 0.12s;
+    position:relative;background:var(--bg-elev);
+  }
+  .qcard:hover{box-shadow:0 3px 12px rgba(58,52,43,0.06);}
+  .qcard.active{background:var(--bg-elev);border-color:var(--med);box-shadow:0 4px 14px rgba(63,173,194,0.13);}
+  .qcard.active::before{
+    content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;
+    background:var(--med);
+  }
+  .qcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .prio-tag{font-size:9px;font-weight:800;letter-spacing:0.08em;padding:3px 7px;border-radius:5px;text-transform:uppercase;}
+  .prio-critical{background:var(--critical-dim);color:var(--critical);}
+  .prio-high{background:var(--high-dim);color:var(--high);}
+  .prio-medium{background:var(--med-dim);color:var(--med);}
+  .prio-low{background:rgba(92,103,137,0.18);color:var(--low);}
+  .qcard-time{font-family:var(--mono);font-size:10px;color:var(--text-faint);}
+  .qcard-title{font-size:12.5px;color:var(--text);line-height:1.4;margin-bottom:6px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .qcard-meta{display:flex;align-items:center;gap:8px;}
+  .dept-dot{width:5px;height:5px;border-radius:50%;}
+  .qcard-dept{font-size:10px;color:var(--text-faint);font-family:var(--mono);letter-spacing:0.02em;}
+
+  /* MAIN REVIEW PANE */
+  .review{flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto;}
+  .review-inner{max-width:760px;margin:0 auto;padding:26px 32px 40px;width:100%;}
+
+  .rv-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:16px;}
+  .rv-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .badge-lg{font-size:11px;font-weight:800;letter-spacing:0.09em;padding:6px 11px;border-radius:7px;text-transform:uppercase;}
+  .id-tag{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+  .fastpath{
+    display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--critical);
+    font-weight:700;letter-spacing:0.03em;
+  }
+  .fastpath svg{width:12px;height:12px;}
+  .rv-timer{font-family:var(--mono);font-size:11px;color:var(--text-faint);text-align:right;}
+  .rv-timer .val{color:var(--text-dim);font-weight:600;}
+
+  .rv-title{font-size:19px;font-weight:650;line-height:1.35;margin:2px 0 16px;color:var(--text);}
+
+  .summary-box{
+    background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:16px;
+    padding:18px 20px;margin-bottom:18px;box-shadow:0 2px 10px rgba(58,52,43,0.04);
+  }
+  .summary-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;font-weight:700;}
+  .summary-text{font-size:14px;line-height:1.6;color:var(--text-dim);}
+  .need-flags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+  .need-flag{
+    font-size:10.5px;padding:5px 10px;border-radius:20px;background:var(--bg-elev-2);
+    border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);
+    display:flex;align-items:center;gap:5px;
+  }
+  .need-flag.uncertain{border-color:rgba(255,176,32,0.4);color:var(--high);}
+  .need-flag .uc-dot{width:5px;height:5px;border-radius:50%;background:var(--high);}
+
+  /* SIGNAL STRIP — signature element */
+  .signal-strip{
+    background:var(--bg-elev);border:1px solid var(--border-soft);border-radius:16px;
+    padding:18px 18px 14px;margin-bottom:18px;box-shadow:0 2px 10px rgba(58,52,43,0.04);
+  }
+  .signal-strip-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .signal-strip-head .summary-label{margin-bottom:0;}
+  .trust-readout{font-family:var(--mono);font-size:11px;}
+  .trust-readout .trust-val{font-size:15px;font-weight:700;}
+  .signal-rows{display:flex;flex-direction:column;gap:11px;}
+  .signal-row{display:grid;grid-template-columns:98px 1fr 46px;align-items:center;gap:10px;}
+  .signal-row-label{font-size:11px;color:var(--text-faint);letter-spacing:0.02em;}
+  .signal-track{
+    position:relative;height:7px;border-radius:4px;background:var(--bg-elev-2);
+    overflow:hidden;border:1px solid var(--border-soft);
+  }
+  .signal-fill{position:absolute;top:0;left:0;bottom:0;border-radius:4px;transition:width 0.4s ease;}
+  .signal-ticks{position:absolute;inset:0;display:flex;justify-content:space-between;padding:0 1px;}
+  .signal-ticks span{width:1px;height:100%;background:rgba(0,0,0,0.25);}
+  .signal-val{font-family:var(--mono);font-size:11.5px;text-align:right;color:var(--text-dim);}
+
+  /* EVIDENCE */
+  .evidence-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .evidence-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;}
+  .ev-card{
+    flex:0 0 260px;background:var(--bg-elev);border:1px solid var(--border-soft);
+    border-radius:14px;padding:14px 15px;box-shadow:0 2px 8px rgba(58,52,43,0.04);
+  }
+  .ev-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .ev-lang{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);text-transform:uppercase;
+    background:var(--bg-elev-2);padding:2px 6px;border-radius:4px;}
+  .ev-sent{font-size:9.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;}
+  .sent-negative{color:var(--fake);}
+  .sent-neutral{color:var(--low);}
+  .sent-positive{color:var(--verified);}
+  .ev-text{font-size:12.5px;line-height:1.55;color:var(--text-dim);margin-bottom:9px;min-height:56px;}
+  .ev-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text-faint);}
+
+  /* ACTION BAR */
+  .actionbar{
+    position:sticky;bottom:0;display:flex;gap:10px;padding-top:14px;
+    border-top:1px solid var(--border-soft);background:linear-gradient(0deg, var(--bg) 65%, transparent);
+  }
+  .btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:14px 16px;border-radius:14px;border:1px solid var(--border);
+    font-size:13.5px;font-weight:700;cursor:pointer;background:var(--bg-elev);color:var(--text);
+    transition:transform 0.08s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn kbd{
+    font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:4px;
+    background:rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);color:var(--text-faint);
+  }
+  .btn-true{background:var(--verified-dim);border-color:rgba(62,180,137,0.35);color:var(--verified);}
+  .btn-true:hover{background:rgba(62,180,137,0.24);box-shadow:0 3px 12px rgba(62,180,137,0.15);}
+  .btn-fake{background:var(--fake-dim);border-color:rgba(235,93,130,0.35);color:var(--fake);}
+  .btn-fake:hover{background:rgba(235,93,130,0.24);box-shadow:0 3px 12px rgba(235,93,130,0.15);}
+  .btn-skip{flex:0 0 120px;color:var(--text-faint);}
+  .btn-skip:hover{background:var(--bg-elev-2);color:var(--text-dim);}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--text);border:1px solid var(--border);padding:12px 22px;border-radius:14px;
+    font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity 0.2s, transform 0.2s;
+    display:flex;align-items:center;gap:8px;box-shadow:0 10px 28px rgba(58,52,43,0.18);color:#FBF7F1;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast-dot{width:7px;height:7px;border-radius:50%;}
+
+  .empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--text-faint);gap:10px;}
+  .empty svg{width:40px;height:40px;opacity:0.4;}
+
+  /* ===== PROOF MODAL ===== */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(5,8,16,0.6);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:50;
+    opacity:0;pointer-events:none;transition:opacity 0.16s;
+  }
+  .modal-overlay.show{opacity:1;pointer-events:auto;}
+  .modal{
+    width:460px;max-width:92vw;max-height:86vh;overflow-y:auto;
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:14px;
+    padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    transform:translateY(10px);transition:transform 0.16s;
+  }
+  .modal-overlay.show .modal{transform:translateY(0);}
+  .modal-head{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+  .modal-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .modal-title{font-size:15px;font-weight:700;color:var(--text);}
+  .modal-sub{font-size:11.5px;color:var(--text-faint);margin:0 0 18px 17px;font-family:var(--mono);}
+  .modal-section-label{font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);font-weight:700;margin-bottom:9px;}
+  .proof-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;}
+  .proof-chip{
+    font-size:12px;padding:8px 12px;border-radius:8px;background:var(--bg-elev-2);
+    border:1px solid var(--border);color:var(--text-dim);cursor:pointer;user-select:none;
+    transition:background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .proof-chip:hover{border-color:var(--text-faint);}
+  .proof-chip.selected{background:var(--med-dim);border-color:var(--med);color:var(--med);}
+  .modal-overlay[data-kind="fake"] .proof-chip.selected{background:var(--fake-dim);border-color:var(--fake);color:var(--fake);}
+  .modal-overlay[data-kind="true"] .proof-chip.selected{background:var(--verified-dim);border-color:var(--verified);color:var(--verified);}
+  .proof-field{margin-bottom:16px;}
+  .proof-field label{display:block;font-size:11px;color:var(--text-faint);margin-bottom:7px;}
+  .proof-field input, .proof-field textarea{
+    width:100%;background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;
+    padding:9px 11px;color:var(--text);font-size:12.5px;font-family:var(--sans);resize:vertical;
+  }
+  .proof-field textarea{min-height:56px;font-family:var(--sans);line-height:1.5;}
+  .proof-field input::placeholder, .proof-field textarea::placeholder{color:var(--text-faint);}
+  .proof-hint{font-size:10.5px;color:var(--text-faint);margin-top:5px;}
+  .proof-hint.warn{color:var(--high);}
+  .modal-actions{display:flex;gap:9px;margin-top:4px;}
+  .modal-btn{
+    flex:1;padding:11px 14px;border-radius:9px;border:1px solid var(--border);
+    font-size:13px;font-weight:700;cursor:pointer;background:var(--bg-elev-2);color:var(--text-dim);
+  }
+  .modal-btn:hover{background:var(--bg-elev-3);}
+  .modal-btn-submit{background:var(--med-dim);border-color:var(--med);color:var(--med);}
+  .modal-overlay[data-kind="fake"] .modal-btn-submit{background:var(--fake-dim);border-color:var(--fake);color:var(--fake);}
+  .modal-overlay[data-kind="true"] .modal-btn-submit{background:var(--verified-dim);border-color:var(--verified);color:var(--verified);}
+  .modal-btn-submit:disabled{opacity:0.4;cursor:not-allowed;}
+  .modal-btn-submit:not(:disabled):hover{filter:brightness(1.15);}
+
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @media (prefers-reduced-motion: reduce){
+    .brand-mark{animation:none;}
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-text">Review Console</div>
+          <div class="brand-sub">You're helping route real reports to the right department</div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="stat-chip"><span class="num" id="stat-queue">6</span><span class="lbl">Waiting</span></div>
+      <div class="stat-chip"><span class="num" id="stat-critical" style="color:var(--critical)">2</span><span class="lbl">Urgent</span></div>
+      <div class="stat-chip"><span class="num" id="stat-reviewed">0</span><span class="lbl">You've reviewed</span></div>
+      <div class="divider-v"></div>
+      <div class="reviewer">
+        <div class="avatar">SR</div>
+        <div class="reviewer-name">S. Rao · Reviewer</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="queue">
+      <div class="queue-head">
+        <h2>What needs review</h2>
+        <p>Most urgent first · click a card, or press T / F to move fast</p>
+      </div>
+      <div class="queue-list" id="queue-list"></div>
+    </div>
+
+    <div class="review" id="review-pane"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot" id="toast-dot"></div><span id="toast-text"></span></div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const DEPT_COLOR = {
+  Healthcare: '#4FC3F7',
+  'Public Municipal': '#FFB020',
+  'Law & Policies': '#F0426B',
+  Tourism: '#33D6A6'
+};
+
+let clusters = [
+  {
+    id:'CL-2291', priority:'critical', dept:'Healthcare', time:'2m ago', ts:0,
+    title:'Multiple reports of flooding cutting off access to District Hospital, patients unable to reach emergency ward',
+    summary:'A cluster of 14 posts from the same district report rising floodwater blocking the main and secondary access roads to District Hospital. Several posts describe patients and an ambulance unable to reach the emergency entrance in the last 40 minutes.',
+    needs:[{label:'Healthcare',pct:96},{label:'Public Municipal',pct:71,uncertain:true}],
+    fakeRisk:12, credibility:88, corroboration:9,
+    evidence:[
+      {lang:'HI',sent:'negative',text:'District hospital ka gate paani mein doob gaya, ambulance nahi ja pa rahi 😢',ts:'14:02',src:'X'},
+      {lang:'EN',sent:'negative',text:'Water is up to my knees outside the hospital gate. Ambulance stuck on the main road for 20 min now.',ts:'14:05',src:'X'},
+      {lang:'KN',sent:'negative',text:'Aspatre road full water, staff walking through it to get in',ts:'14:09',src:'X'},
+    ]
+  },
+  {
+    id:'CL-2288', priority:'critical', dept:'Law & Policies', time:'6m ago', ts:1,
+    title:'Unverified claim of gas leak near central market — high share velocity, low source diversity',
+    summary:'A claim of a gas leak near the central market is spreading rapidly, but nearly all posts trace back to two accounts reposted 40+ times within 8 minutes. No independent on-the-ground corroboration found yet.',
+    needs:[{label:'Law & Policies',pct:83},{label:'Public Municipal',pct:44,uncertain:true}],
+    fakeRisk:74, credibility:31, corroboration:2,
+    evidence:[
+      {lang:'EN',sent:'negative',text:'GAS LEAK near central market!! everyone evacuate now share this',ts:'13:58',src:'X'},
+      {lang:'EN',sent:'negative',text:'RT gas leak central market evacuate now share this',ts:'13:59',src:'X'},
+      {lang:'TA',sent:'neutral',text:'central market area la edhavadhu smell irukka nu kேlvi kekaranga',ts:'14:01',src:'X'},
+    ]
+  },
+  {
+    id:'CL-2276', priority:'high', dept:'Tourism', time:'18m ago', ts:2,
+    title:'Stranded trekking group near hill station reporting low supplies after trail closure',
+    summary:'A group of roughly 12 trekkers report being stranded near a closed trail after unexpected weather. Posts describe dwindling food and water, and request contact with local rescue services.',
+    needs:[{label:'Tourism',pct:91},{label:'Healthcare',pct:38}],
+    fakeRisk:22, credibility:76, corroboration:5,
+    evidence:[
+      {lang:'EN',sent:'negative',text:'Stuck near the ridge trail since morning, trail closed behind us, running low on water',ts:'13:41',src:'X'},
+      {lang:'EN',sent:'neutral',text:'Anyone have local rescue number for this area? Group of 12 stuck near the closed trail',ts:'13:47',src:'X'},
+    ]
+  },
+  {
+    id:'CL-2269', priority:'medium', dept:'Public Municipal', time:'31m ago', ts:3,
+    title:'Recurring complaints about garbage collection delays in Ward 14, third day running',
+    summary:'Steady stream of complaints (not urgent, non-life-threatening) about missed garbage collection in Ward 14 for a third consecutive day. Sentiment is frustrated but not distressed.',
+    needs:[{label:'Public Municipal',pct:89}],
+    fakeRisk:8, credibility:82, corroboration:11,
+    evidence:[
+      {lang:'EN',sent:'negative',text:'Third day no garbage pickup in Ward 14, smell is unbearable now',ts:'13:20',src:'X'},
+      {lang:'KN',sent:'negative',text:'Ward 14 la kasa tegiyilla mooru dina ayithu',ts:'13:25',src:'X'},
+    ]
+  },
+  {
+    id:'CL-2260', priority:'medium', dept:'Healthcare', time:'44m ago', ts:4,
+    title:'Long queue and wait-time complaints at community vaccination camp',
+    summary:'Multiple posts describe long wait times (2+ hours) at a community vaccination camp. No safety concerns reported, mainly logistics frustration.',
+    needs:[{label:'Healthcare',pct:78}],
+    fakeRisk:6, credibility:85, corroboration:6,
+    evidence:[
+      {lang:'EN',sent:'neutral',text:'Been in line at the vaccination camp for 2 hours, only one counter open',ts:'13:10',src:'X'},
+    ]
+  },
+  {
+    id:'CL-2251', priority:'low', dept:'Tourism', time:'1h ago', ts:5,
+    title:'Positive posts about newly reopened lakeside viewpoint drawing crowds',
+    summary:'Cluster of largely positive posts about a lakeside viewpoint reopening after maintenance. Flagged only for volume, not urgency.',
+    needs:[{label:'Tourism',pct:64}],
+    fakeRisk:4, credibility:90, corroboration:14,
+    evidence:[
+      {lang:'EN',sent:'positive',text:'Lakeside viewpoint is finally open again, looks amazing this evening',ts:'12:55',src:'X'},
+    ]
+  },
+];
+
+let activeId = clusters[0].id;
+let reviewedCount = 0;
+
+function prioLabel(p){ return {critical:'Critical', high:'High', medium:'Medium', low:'Low'}[p]; }
+function prioIcon(p){ return {critical:'🔴', high:'🟠', medium:'🔵', low:'⚪'}[p]; }
+
+function renderQueue(){
+  const list = document.getElementById('queue-list');
+  const order = {critical:0, high:1, medium:2, low:3};
+  const sorted = [...clusters].sort((a,b)=> order[a.priority]-order[b.priority] || a.ts-b.ts);
+  list.innerHTML = sorted.map(c => `
+    <div class="qcard ${c.id===activeId?'active':''}" onclick="selectCluster('${c.id}')">
+      <div class="qcard-top">
+        <span class="prio-tag prio-${c.priority}">${prioIcon(c.priority)} ${prioLabel(c.priority)}</span>
+        <span class="qcard-time">${c.time}</span>
+      </div>
+      <div class="qcard-title">${c.title}</div>
+      <div class="qcard-meta">
+        <span class="dept-dot" style="background:${DEPT_COLOR[c.dept]}"></span>
+        <span class="qcard-dept">${c.dept} · ${c.id}</span>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('stat-queue').textContent = clusters.length;
+  document.getElementById('stat-critical').textContent = clusters.filter(c=>c.priority==='critical').length;
+  document.getElementById('stat-reviewed').textContent = reviewedCount;
+}
+
+function trustColor(score){
+  if(score >= 70) return 'var(--verified)';
+  if(score >= 40) return 'var(--high)';
+  return 'var(--fake)';
+}
+
+function signalRow(label, value, invert){
+  const display = invert ? 100-value : value;
+  const color = trustColor(display);
+  return `
+    <div class="signal-row">
+      <div class="signal-row-label">${label}</div>
+      <div class="signal-track">
+        <div class="signal-fill" style="width:${display}%; background:${color};"></div>
+        <div class="signal-ticks">${Array.from({length:9}).map(()=> '<span></span>').join('')}</div>
+      </div>
+      <div class="signal-val">${display}%</div>
+    </div>
+  `;
+}
+
+function renderReview(){
+  const c = clusters.find(x=>x.id===activeId);
+  const pane = document.getElementById('review-pane');
+  if(!c){
+    pane.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg>
+      <div>All caught up! Nothing waiting on you right now. 🎉</div>
+    </div>`;
+    return;
+  }
+
+  const trust = Math.round((100-c.fakeRisk)*0.4 + c.credibility*0.4 + Math.min(c.corroboration*8,100)*0.2);
+
+  pane.innerHTML = `
+    <div class="review-inner">
+      <div class="rv-header">
+        <div class="rv-header-left">
+          <span class="badge-lg" style="background:var(--${c.priority==='critical'?'critical':c.priority==='high'?'high':c.priority==='medium'?'med':'low'}${c.priority==='low'?'':'-dim'}); color:${c.priority==='low'?'var(--text-dim)':'var(--'+ (c.priority==='critical'?'critical':c.priority==='high'?'high':'med') +')'}">${prioIcon(c.priority)} ${prioLabel(c.priority)} priority</span>
+          <span class="id-tag">${c.id} · ${c.dept} · ${c.time}</span>
+          ${c.priority==='critical' ? `<span class="fastpath"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>Bumped to the top — this one's urgent</span>` : ''}
+        </div>
+        <div class="rv-timer">Time on this<br><span class="val" id="on-screen-timer">0:00</span></div>
+      </div>
+
+      <div class="rv-title">${c.title}</div>
+
+      <div class="summary-box">
+        <div class="summary-label">What's happening, in short</div>
+        <div class="summary-text">${c.summary}</div>
+        <div class="need-flags">
+          ${c.needs.map(n => `<span class="need-flag ${n.uncertain?'uncertain':''}">${n.uncertain?'<span class="uc-dot"></span>':''}${n.label} · ${n.pct}%${n.uncertain?' · not sure yet':''}</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="signal-strip">
+        <div class="signal-strip-head">
+          <div>
+            <div class="summary-label">How much can we trust this?</div>
+          </div>
+          <div class="trust-readout">Overall <span class="trust-val" style="color:${trustColor(trust)}">${trust}%</span></div>
+        </div>
+        <div class="signal-rows">
+          ${signalRow('Source is credible', c.credibility)}
+          ${signalRow('Likely genuine', c.fakeRisk, true)}
+          <div class="signal-row">
+            <div class="signal-row-label">Backed up by others</div>
+            <div class="signal-track">
+              <div class="signal-fill" style="width:${Math.min(c.corroboration*8,100)}%; background:${trustColor(Math.min(c.corroboration*8,100))};"></div>
+              <div class="signal-ticks">${Array.from({length:9}).map(()=> '<span></span>').join('')}</div>
+            </div>
+            <div class="signal-val">${c.corroboration} posts</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="evidence-label">
+        <div class="summary-label" style="margin-bottom:0;">Posts backing this up (${c.evidence.length})</div>
+      </div>
+      <div class="evidence-scroll">
+        ${c.evidence.map(e => `
+          <div class="ev-card">
+            <div class="ev-card-top">
+              <span class="ev-lang">${e.lang}</span>
+              <span class="ev-sent sent-${e.sent}">${e.sent}</span>
+            </div>
+            <div class="ev-text">${e.text}</div>
+            <div class="ev-meta"><span>${e.src}</span><span>${e.ts}</span></div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="actionbar">
+        <button class="btn btn-true" onclick="resolve('true')">✓ Yes, this is real <kbd>T</kbd></button>
+        <button class="btn btn-fake" onclick="resolve('fake')">✕ This looks fake <kbd>F</kbd></button>
+        <button class="btn btn-skip" onclick="resolve('skip')">Skip for now <kbd>→</kbd></button>
+      </div>
+    </div>
+  `;
+  startTimer();
+}
+
+let timerInterval, startTime;
+function startTimer(){
+  clearInterval(timerInterval);
+  startTime = Date.now();
+  const el = document.getElementById('on-screen-timer');
+  timerInterval = setInterval(()=>{
+    if(!el) { clearInterval(timerInterval); return; }
+    const s = Math.floor((Date.now()-startTime)/1000);
+    el.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function showToast(text, color){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = text;
+  document.getElementById('toast-dot').style.background = color;
+  t.classList.add('show');
+  clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
+function selectCluster(id){
+  activeId = id;
+  renderQueue();
+  renderReview();
+}
+
+function resolve(action){
+  const c = clusters.find(x=>x.id===activeId);
+  if(!c) return;
+  if(action==='true'){ showToast(`Nice — ${c.id} is on its way to ${c.dept}`, 'var(--verified)'); reviewedCount++; }
+  else if(action==='fake'){ showToast(`Got it — ${c.id} won't be routed`, 'var(--fake)'); reviewedCount++; }
+  else { showToast(`Okay, we'll come back to ${c.id} later`, 'var(--text-faint)'); }
+
+  if(action !== 'skip'){
+    clusters = clusters.filter(x=>x.id!==activeId);
+  } else {
+    clusters = clusters.filter(x=>x.id!==activeId).concat(c);
+  }
+  advanceQueue();
+}
+
+function advanceQueue(){
+  const order = {critical:0, high:1, medium:2, low:3};
+  const next = [...clusters].sort((a,b)=> order[a.priority]-order[b.priority] || a.ts-b.ts)[0];
+  activeId = next ? next.id : null;
+  renderQueue();
+  renderReview();
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(!activeId) return;
+  if(e.key==='t' || e.key==='T') resolve('true');
+  if(e.key==='f' || e.key==='F') resolve('fake');
+  if(e.key==='ArrowRight') resolve('skip');
+});
+
+renderQueue();
+renderReview();
+</script>
+</body>
+</html>
