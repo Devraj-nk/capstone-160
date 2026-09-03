@@ -29,4 +29,10 @@ CLUSTERED_POSTS = [
 ]
 
 # --- Evidence: privacy masking ---
-PII_POST = "call me at 9876543210 or +91 98765 43210, I am near 123 MG Road, Bangalore"
+# Address redaction is structural (by metadata key), not a free-text scan —
+# see backend/app/evidence/privacy.py — since a keyword-based English address
+# regex ("Road"/"Street"/"Nagar"/...) doesn't generalize to the multilingual
+# text this system handles. Phone-number redaction still applies to free
+# text, since digit patterns are language-agnostic.
+PII_POST = "call me at 9876543210 or +91 98765 43210, I am near the old bus stand"
+PII_METADATA = {"location": "123 MG Road, Bangalore"}

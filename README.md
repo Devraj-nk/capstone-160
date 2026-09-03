@@ -26,6 +26,23 @@ This project builds a real-time multilingual pipeline that detects sentiment and
 The system is organized into five layers: **Ingestion → Preprocessing → AI Analysis → Evidence & Human Validation → Routing & Analytics**.
 
 ![High-Level Design](docs/HLD.png)
+**Pipeline**
+
+1. Ingestion (Devraj)
+2. Preprocessing — cleaning + dedup (Devraj)
+3. Disaster Classification gate (Favaz)
+4. Language Detection (Favaz)
+5. Sentiment Analysis (Akshata) + Need Detection (Favaz) — parallel
+6. Combine step (Devraj) — merges 3,4,5 → adds severity, actionability
+7. Embedding Generation (Akshata) — IndicSBERT vectors
+8. → CLUSTERING (Akshata) ← YOU ARE HERE
+9. Fake-News Scoring (Christa) + Priority Scoring (Akshata) — run right after, using clusters from step 8
+10. Evidence Extraction (Christa/Devraj) — needs step 8 (clusters) + step 9 (priority)
+11. Summarization (Akshata)
+12. Store Evidence + privacy masking (Christa/Devraj)
+13. Human Review (Christa)
+14. Confirm/Reject → Feedback loop / Route to Department (Devraj)
+15. Dashboard/Reports (Devraj)
 
 **Layers**
 
@@ -146,14 +163,7 @@ Project ID 160 — Guide: **Dr. Saritha**
 
 | Name | SRN | Contribution |
 |---|---|---|
-| Akshata Udaganve | PES2UG23CS043 | AI4Bharath dataset preprocessing, sentiment model training |
-| Christananda B | PES2UG23CS158 | Tweepy dataset preprocessing and class extraction |
-| Devraj Ishwar Naik | PES2UG23CS167 | SentiMix dataset preprocessing and reconstruction, data ingestion layer |
-| Favaz Ahmed Alam | PES2UG23CS190 | Disaster dataset preprocessing, class extraction |
-
-## Docs
-
-- [docs/HLD.png](docs/HLD.png) — High-level architecture diagram
-- [docs/data_flow_swimlanes.jpg](docs/data_flow_swimlanes.jpg) — End-to-end data flow (swimlane view)
-- [docs/160_Phase1_ESA_PPT.pptx](docs/160_Phase1_ESA_PPT.pptx) — Phase 1 End Semester Assessment
-- [docs/160_Phase_2_ESA.pptx](docs/160_Phase_2_ESA.pptx) — Phase 2 End Semester Assessment
+| Akshata Udaganve | PES2UG23CS043 |
+| Christananda B | PES2UG23CS158 |
+| Devraj Ishwar Naik | PES2UG23CS167 |
+| Favaz Ahmed Alam | PES2UG23CS190 |

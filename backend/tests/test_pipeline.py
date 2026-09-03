@@ -20,6 +20,7 @@ from tests.test_data import (
     EMPTY_POSTS,
     MESSY_POST,
     ORIGINAL_POST,
+    PII_METADATA,
     PII_POST,
     RETWEET_OF_ORIGINAL,
     SIMILAR_BUT_DISTINCT_POST,
@@ -107,7 +108,12 @@ def test_evidence_extract_returns_top_k_per_cluster():
 def test_evidence_store_masks_pii_before_persisting():
     extract_body = client.post(
         "/evidence/extract",
-        json={"posts": [{"id": "pii1", "text": PII_POST, "cluster_id": "test-cluster"}], "top_k": 1},
+        json={
+            "posts": [
+                {"id": "pii1", "text": PII_POST, "cluster_id": "test-cluster", "metadata": PII_METADATA}
+            ],
+            "top_k": 1,
+        },
     ).json()
 
     store_response = client.post("/evidence/store", json={"evidence": extract_body["evidence"]})
@@ -117,11 +123,15 @@ def test_evidence_store_masks_pii_before_persisting():
 
     docs = asyncio.run(find_documents("evidence", {"id": stored_ids[0]}))
     assert len(docs) == 1
-    stored_text = docs[0]["text"]
-    assert "9876543210" not in stored_text
-    assert "123 MG Road" not in stored_text
-    assert "[PHONE_REDACTED]" in stored_text
-    assert "[ADDRESS_REDACTED]" in stored_text
+    stored_doc = docs[0]
+
+    # Phone numbers are redacted wherever they appear in free text.
+    assert "9876543210" not in stored_doc["text"]
+    assert "[PHONE_REDACTED]" in stored_doc["text"]
+
+    # Address redaction is structural: the "location" metadata key is masked
+    # outright, regardless of language; free text is not scanned for addresses.
+    assert stored_doc["metadata"]["location"] == "[ADDRESS_REDACTED]"
 
 
 # --- Dynamic DB layer / Situations ---
