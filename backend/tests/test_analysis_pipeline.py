@@ -20,6 +20,19 @@ from app.preprocessing import language
 client = TestClient(app)
 
 
+def _show(step: str, text: str, output: object) -> None:
+    """Quick eyeball helper: prints what went into a (mocked) model call and
+    what came out, so `pytest -s` gives a readable input/output trace for
+    each step. Doesn't affect pass/fail — run with -s to actually see it."""
+    message = f"\n[{step}] IN:  {text!r}\n[{step}] OUT: {output!r}"
+    try:
+        print(message)
+    except UnicodeEncodeError:
+        # Windows terminals on a non-UTF-8 codepage can't print native-script
+        # test strings directly — fall back to an ASCII-escaped form.
+        print(message.encode("ascii", "backslashreplace").decode("ascii"))
+
+
 # --- Step 4: language detection ---
 
 
@@ -45,6 +58,7 @@ def test_detect_language_final_native_script_skips_the_classifier(monkeypatch):
     monkeypatch.setattr(language, "_predict_with_classifier", lambda text: calls.append(text) or "xx")
 
     result = language.detect_language_final("यह बहुत ज़रूरी है")
+    _show("language", "यह बहुत ज़रूरी है", result)
 
     assert result == {"lang": "hi", "is_romanized": False, "is_code_mixed": False}
     assert calls == []  # native-script text never reaches the model
@@ -54,6 +68,7 @@ def test_detect_language_final_romanized_text_uses_classifier_fallback(monkeypat
     monkeypatch.setattr(language, "_predict_with_classifier", lambda text: "kn")
 
     result = language.detect_language_final("nan yen madthidini gottilla")
+    _show("language", "nan yen madthidini gottilla", result)
 
     assert result["lang"] == "kn"
     assert result["is_romanized"] is True  # classifier said kn, not en
@@ -63,6 +78,7 @@ def test_detect_language_final_english_is_not_flagged_romanized(monkeypatch):
     monkeypatch.setattr(language, "_predict_with_classifier", lambda text: "en")
 
     result = language.detect_language_final("flooding near the river bridge")
+    _show("language", "flooding near the river bridge", result)
 
     assert result["lang"] == "en"
     assert result["is_romanized"] is False
@@ -83,6 +99,7 @@ def test_classify_disaster_passes_gate_above_threshold(monkeypatch):
     monkeypatch.setattr(disaster_classification, "_predict_disaster_probability", lambda text: 0.9)
 
     result = disaster_classification.classify_disaster("flood in my area", "en")
+    _show("disaster", "flood in my area", result)
 
     assert result == {"is_disaster": True, "disaster_confidence": 0.9}
 
@@ -91,6 +108,7 @@ def test_classify_disaster_fails_gate_below_threshold(monkeypatch):
     monkeypatch.setattr(disaster_classification, "_predict_disaster_probability", lambda text: 0.2)
 
     result = disaster_classification.classify_disaster("nice weather today", "en")
+    _show("disaster", "nice weather today", result)
 
     assert result["is_disaster"] is False
 
@@ -100,9 +118,11 @@ def test_classify_disaster_uses_per_language_threshold_when_configured(monkeypat
     monkeypatch.setitem(disaster_classification.PER_LANG_THRESHOLDS, "kn", 0.7)
 
     below_kn_threshold = disaster_classification.classify_disaster("something", "kn")
+    _show("disaster (kn threshold=0.7)", "something", below_kn_threshold)
     assert below_kn_threshold["is_disaster"] is False  # 0.6 < 0.7 kn-specific threshold
 
     above_default_threshold = disaster_classification.classify_disaster("something", "en")
+    _show("disaster (default threshold=0.5)", "something", above_default_threshold)
     assert above_default_threshold["is_disaster"] is True  # 0.6 >= 0.5 default, no en override set
 
 
@@ -113,6 +133,7 @@ def test_analyze_sentiment_negative_case(monkeypatch):
     monkeypatch.setattr(sentiment, "_predict_sentiment_probs", lambda text: [0.9943, 0.0057])
 
     result = sentiment.analyze_sentiment("flood in my area need help urgently")
+    _show("sentiment", "flood in my area need help urgently", result)
 
     assert result["sentiment_label"] == "negative"
     assert result["sentiment_confidence"] == 0.9943
@@ -126,6 +147,7 @@ def test_analyze_sentiment_positive_case_still_reports_negativity(monkeypatch):
     monkeypatch.setattr(sentiment, "_predict_sentiment_probs", lambda text: [0.05, 0.95])
 
     result = sentiment.analyze_sentiment("things are looking up now")
+    _show("sentiment", "things are looking up now", result)
 
     assert result["sentiment_label"] == "positive"
     assert result["sentiment_negativity"] == 0.05  # always P(negative), regardless of which class won
@@ -142,6 +164,7 @@ def test_detect_needs_returns_raw_probabilities_and_max_confidence(monkeypatch):
     )
 
     result = need_detection.detect_needs("road flooded, municipal please help")
+    _show("need_detection", "road flooded, municipal please help", result)
 
     assert result["needs"] == {"healthcare": 0.011, "municipal": 0.998, "tourism": 0.015, "law": 0.013}
     assert result["need_confidence"] == 0.998
@@ -222,6 +245,8 @@ def test_analysis_pipeline_endpoint_runs_steps_3_to_6(monkeypatch):
 
     assert response.status_code == 200
     body = response.json()
+    _show("/analysis/pipeline", "flood in my area need help urgently", body)
+
     assert body["tweet_id"] == "tw_00981"
     assert body["lang"] == "en"
     assert body["is_romanized"] is False
@@ -251,6 +276,8 @@ def test_analysis_pipeline_endpoint_handles_romanized_code_mixed_text(monkeypatc
 
     assert response.status_code == 200
     body = response.json()
+    _show("/analysis/pipeline", "nan yen madthidini gottilla", body)
+
     assert body["lang"] == "kn"
     assert body["is_romanized"] is True
     assert body["is_disaster"] is False  # 0.3 below default 0.5 threshold
