@@ -1,5 +1,8 @@
-my_work.txt
 __pycache__/
 *.pyc
 .venv/
 .env
+
+# Other files / folders
+my_work.txt
+Devraj's
