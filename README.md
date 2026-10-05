@@ -100,9 +100,6 @@ The system is organized into five layers: **Ingestion → Preprocessing → AI A
 | AI4Bharat multilingual sentiment | Indic-language sentiment (Hindi, Kannada, Tamil, Telugu) |
 | TweetEval | Large-scale real-world sentiment/keyword extraction |
 
-## Project Status
-
-Currently in the data preprocessing, base model training, and evaluation stage (Capstone Phase 2). Design docs and architecture diagrams live in [docs/](docs/).
 
 ## Project Structure
 
@@ -154,6 +151,11 @@ which looks like the packages "aren't installed" when they are). Or open VS Code
 Testing panel and click ▶ — test discovery is pre-configured in `.vscode/settings.json`,
 but make sure the interpreter selected in VS Code's status bar is the same one you
 ran `pip install -r requirements.txt` with.
+
+To see a separate readable input/output trace of the main flow without running
+pytest, run `cd backend && python tools/trace_pipeline.py`. This offline trace
+uses deterministic model stubs and an in-memory MongoDB, then prints the results
+of preprocessing, analysis, clustering, evidence extraction, and evidence storage.
 
 Endpoint stubs currently pass data through unchanged or return placeholder values — swap in the real model/logic per router's TODOs. `backend/app/routers/situations.py` is the one new piece with no earlier equivalent: it's the API contract the React frontend actually calls (`GET /situations`, `POST /situations/{id}/decision`, `GET /analytics/summary`), backed by MongoDB.
 
