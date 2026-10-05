@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import CORS_ORIGINS
-from .routers import analysis, evidence, ingestion, preprocessing, queue, situations, summarization
+from .routers import analysis, clustering, evidence, ingestion, preprocessing, queue, situations, summarization
 
 app = FastAPI(title="Crisis Monitoring Backend", version="0.1.0")
 
@@ -20,6 +20,7 @@ app.include_router(ingestion.router)
 app.include_router(queue.router)
 app.include_router(preprocessing.router)
 app.include_router(analysis.router)
+app.include_router(clustering.router)
 app.include_router(summarization.router)
 app.include_router(evidence.router)
 app.include_router(situations.router)

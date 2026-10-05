@@ -1,15 +1,25 @@
 from __future__ import annotations
 
-# Step 7 (Akshata) — IndicSBERT vectors generated from the combined record's
-# `text` field, feeding Clustering (Step 8). The handoff doc names the model
-# family (IndicSBERT) but doesn't hand off a model repo id, pooling strategy,
-# or vector dimension the way every other step here does — so this is left
-# as an explicit gap rather than guessed at. Fill in once that's available.
+from typing import Any
+
+
+EMBEDDING_MODEL_PATH = "l3cube-pune/indic-sentence-similarity-sbert"
+
+_embedding_model: Any = None
+
+
+def _load_embedding_model() -> Any:
+    global _embedding_model
+    if _embedding_model is None:
+        from sentence_transformers import SentenceTransformer
+
+        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_PATH)
+    return _embedding_model
 
 
 def generate_embedding(text: str) -> list[float]:
-    raise NotImplementedError(
-        "Step 7 embedding generation not yet specified — no IndicSBERT model "
-        "id/config was included in the pipeline handoff. Needed before "
-        "Clustering (Step 8) can run."
-    )
+    """Generate one normalized IndicSBERT embedding for a post."""
+    if not text.strip():
+        raise ValueError("Cannot embed empty text")
+    embedding = _load_embedding_model().encode(text, normalize_embeddings=True)
+    return embedding.tolist()

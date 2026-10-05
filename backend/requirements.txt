@@ -17,6 +17,8 @@ sentencepiece>=0.2,<1
 
 # evidence
 sentence-transformers>=3.0,<6
+hdbscan>=0.8.33,<1
+scikit-learn>=1.4,<2
 
 # testing
 pytest>=8.0,<9
