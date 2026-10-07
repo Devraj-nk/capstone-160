@@ -153,7 +153,7 @@ but make sure the interpreter selected in VS Code's status bar is the same one y
 ran `pip install -r requirements.txt` with.
 
 To see a separate readable input/output trace of the main flow without running
-pytest, run `cd backend && python tools/trace_pipeline.py`. This offline trace
+pytest, run `python backend/tools/trace_pipeline.py`. This offline trace
 uses deterministic model stubs and an in-memory MongoDB, then prints the results
 of preprocessing, analysis, clustering, evidence extraction, and evidence storage.
 
