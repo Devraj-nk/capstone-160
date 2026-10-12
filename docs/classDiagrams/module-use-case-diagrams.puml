@@ -1,0 +1,292 @@
+'' Per-module use-case diagrams for the Disaster Information Analysis System
+'' Reference: docs/classDiagrams/ModulesRelation.png
+'' Copy one @startuml/@enduml block at a time into draw.io PlantUML.
+
+@startuml PresentationUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Human Reviewer" as Reviewer
+actor "Admin / Analyst" as Admin
+rectangle "Presentation Layer" {
+  usecase "Open Review Console" as P1
+  usecase "View Pending Situations" as P2
+  usecase "Approve Situation" as P3
+  usecase "Reject Situation" as P4
+  usecase "Open Dashboard" as P5
+  usecase "View Situation Summary" as P6
+  usecase "View Department Counts" as P7
+}
+Reviewer --> P1
+Reviewer --> P2
+Reviewer --> P3
+Reviewer --> P4
+Admin --> P5
+Admin --> P6
+Admin --> P7
+P3 ..> P2 : <<include>>
+P4 ..> P2 : <<include>>
+@enduml
+
+@startuml OrchestrationUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Social Media Source /\nSimulator" as Source
+actor "Frontend Client" as Frontend
+rectangle "Orchestration Layer" {
+  usecase "Receive Ingestion Request" as O1
+  usecase "Receive Processing Request" as O2
+  usecase "Receive Situation Request" as O3
+  usecase "Register Routers" as O4
+  usecase "Return Health Status" as O5
+}
+Source --> O1
+Frontend --> O2
+Frontend --> O3
+O4 ..> O1 : <<include>>
+O4 ..> O2 : <<include>>
+O4 ..> O3 : <<include>>
+@enduml
+
+@startuml InputProcessingUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Social Media Source /\nSimulator" as Source
+actor "Analysis Module" as Analysis
+actor "Admin / Analyst" as Admin
+rectangle "Input Processing Module" {
+  usecase "Stream Posts" as I1
+  usecase "Validate Incoming Post" as I2
+  usecase "Add Ingestion Metadata" as I3
+  usecase "Enqueue Post" as I4
+  usecase "Dequeue Post" as I5
+  usecase "Drop Oldest Post When Full" as I6
+  usecase "Clean Text" as I7
+  usecase "Detect Duplicate or Repost" as I8
+  usecase "Detect Language" as I9
+  usecase "Detect Romanized Text" as I10
+  usecase "Detect Code-Mixed Text" as I11
+  usecase "View Queue Health" as I12
+}
+Source --> I1
+I1 --> I2
+I2 --> I3
+I3 --> I4
+I4 ..> I6 : <<extend>>
+Analysis --> I5
+I5 --> I7
+I7 --> I8
+I7 --> I9
+I9 --> I10
+I9 --> I11
+Admin --> I12
+@enduml
+
+@startuml AnalysisUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Input Processing Module" as Input
+actor "Clustering Module" as Clustering
+actor "Admin / Analyst" as Admin
+rectangle "Analysis Module" {
+  usecase "Run Analysis Pipeline" as A1
+  usecase "Classify Disaster" as A2
+  usecase "Detect Department Needs" as A3
+  usecase "Analyze Sentiment" as A4
+  usecase "Calculate Severity" as A5
+  usecase "Calculate Actionability" as A6
+  usecase "Combine Analysis Outputs" as A7
+  usecase "Use Zero-Shot Fallback" as A8
+  usecase "Calculate Fake Score" as A9
+  usecase "Configure Model Thresholds" as A10
+  usecase "Evaluate Model Metrics" as A11
+}
+Input --> A1
+A1 ..> A2 : <<include>>
+A1 ..> A3 : <<include>>
+A1 ..> A4 : <<include>>
+A2 --> A7
+A3 --> A7
+A4 --> A7
+A7 ..> A5 : <<include>>
+A7 ..> A6 : <<include>>
+A8 ..> A3 : <<extend>>
+A7 --> Clustering : sends result
+A1 ..> A9 : <<include>>
+Admin --> A10
+Admin --> A11
+@enduml
+
+@startuml ClusteringUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Analysis Module" as Analysis
+actor "Situation Module" as Situation
+actor "Admin / Analyst" as Admin
+rectangle "Clustering Module" {
+  usecase "Generate Text Embedding" as C1
+  usecase "Compare with Existing Clusters" as C2
+  usecase "Assign Post to Cluster" as C3
+  usecase "Create New Cluster" as C4
+  usecase "Check Time Window" as C5
+  usecase "Check Department Overlap" as C6
+  usecase "Recalculate Cluster Centroid" as C7
+  usecase "Run Periodic Reclustering" as C8
+  usecase "Identify Complete Situations" as C9
+  usecase "Clear Clusters" as C10
+}
+Analysis --> C3
+C3 ..> C1 : <<include>>
+C3 ..> C2 : <<include>>
+C2 ..> C5 : <<include>>
+C2 ..> C6 : <<include>>
+C3 ..> C4 : <<extend>>
+C3 ..> C7 : <<include>>
+C8 ..> C2 : <<include>>
+Situation --> C9
+Admin --> C8
+Admin --> C10
+@enduml
+
+@startuml SituationUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Clustering Module" as Clustering
+actor "Human Reviewer" as Reviewer
+actor "Admin / Analyst" as Admin
+actor "Evidence Module" as Evidence
+rectangle "Situation Module" {
+  usecase "Create Situation from Cluster" as S1
+  usecase "Generate Situation Summary" as S2
+  usecase "Calculate Situation Priority" as S3
+  usecase "List Situations" as S4
+  usecase "Filter by Status" as S5
+  usecase "View Situation Details" as S6
+  usecase "Approve Situation" as S7
+  usecase "Reject Situation" as S8
+  usecase "Update Situation Status" as S9
+  usecase "Request Supporting Evidence" as S10
+}
+Clustering --> S1
+S1 ..> S2 : <<include>>
+S1 ..> S3 : <<include>>
+S1 ..> S10 : <<include>>
+Evidence --> S10
+Reviewer --> S4
+Reviewer --> S6
+Reviewer --> S7
+Reviewer --> S8
+S7 ..> S9 : <<include>>
+S8 ..> S9 : <<include>>
+Admin --> S4
+S4 ..> S5 : <<include>>
+@enduml
+
+@startuml EvidenceUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Situation Module" as Situation
+actor "Human Reviewer" as Reviewer
+actor "Database" as Database
+rectangle "Evidence Module" {
+  usecase "Extract Evidence Posts" as E1
+  usecase "Rank Representative Posts" as E2
+  usecase "Select Top Posts" as E3
+  usecase "Mask Personal Details" as E4
+  usecase "Mask Sensitive Metadata" as E5
+  usecase "Store Evidence" as E6
+  usecase "View Evidence" as E7
+}
+Situation --> E1
+E1 ..> E2 : <<include>>
+E2 ..> E3 : <<include>>
+E1 ..> E4 : <<include>>
+E1 ..> E5 : <<include>>
+E1 --> E6
+E6 --> Database
+Reviewer --> E7
+E7 --> Database
+@enduml
+
+@startuml PersistentUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Situation Module" as Situation
+actor "Evidence Module" as Evidence
+actor "Review and Routing Module" as Review
+actor "MongoDB" as Mongo
+rectangle "Persistent Module" {
+  usecase "Open Database Collection" as D1
+  usecase "Save Document" as D2
+  usecase "Find Documents" as D3
+  usecase "Find One Document" as D4
+  usecase "Update Document" as D5
+  usecase "Delete Document" as D6
+}
+Situation --> D2
+Situation --> D3
+Situation --> D4
+Situation --> D5
+Evidence --> D2
+Evidence --> D3
+Review --> D3
+Review --> D5
+D2 ..> D1 : <<include>>
+D3 ..> D1 : <<include>>
+D4 ..> D1 : <<include>>
+D5 ..> D1 : <<include>>
+D6 ..> D1 : <<include>>
+D1 --> Mongo
+@enduml
+
+@startuml ReviewRoutingUseCases
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Human Reviewer" as Reviewer
+actor "Department Officer" as Officer
+actor "Admin / Analyst" as Admin
+actor "Persistent Module" as Persistence
+rectangle "Review and Routing Module" {
+  usecase "View Pending Situation" as R1
+  usecase "View Evidence" as R2
+  usecase "Vote True or Fake" as R3
+  usecase "Approve Situation" as R4
+  usecase "Reject Situation" as R5
+  usecase "Auto-Demote Linked Situations" as R6
+  usecase "Route Confirmed Situation" as R7
+  usecase "View Department Queue" as R8
+  usecase "Acknowledge Situation" as R9
+  usecase "Mark Situation Resolved" as R10
+  usecase "Monitor Routing Status" as R11
+}
+Reviewer --> R1
+Reviewer --> R2
+Reviewer --> R3
+Reviewer --> R4
+Reviewer --> R5
+R4 ..> R7 : <<include>>
+R3 ..> R6 : <<extend>>
+Officer --> R8
+Officer --> R9
+Officer --> R10
+Admin --> R11
+R4 --> Persistence
+R5 --> Persistence
+R7 --> Persistence
+R9 --> Persistence
+R10 --> Persistence
+note right of R3
+Detailed voting is planned.
+end note
+note right of R7
+Department routing is planned.
+end note
+@enduml

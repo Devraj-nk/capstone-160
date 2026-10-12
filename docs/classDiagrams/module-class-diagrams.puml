@@ -1,0 +1,506 @@
+'' ============================================================================
+'' Per-module class diagrams for the Disaster Information Analysis System
+'' Reference: docs/classDiagrams/ModulesRelation.png
+''
+'' Each @startuml/@enduml block is a separate diagram. In draw.io, copy one
+'' block at a time into Arrange > Insert > Advanced > PlantUML.
+'' ============================================================================
+
+@startuml PresentationLayer
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Presentation Layer" {
+  class FrontEnd {
+    - currentPage: str
+    - errorMessage: str
+    + viewReviewPage()
+    + viewDashboard()
+    + approveSituation(id: str)
+    + rejectSituation(id: str)
+  }
+
+  class APIClient {
+    - baseUrl: str
+    + getPendingSituations(): list
+    + getConfirmedSituations(): list
+    + decideSituation(id: str, decision: str)
+    + getAnalyticsSummary(): dict
+  }
+}
+
+FrontEnd --> APIClient : sends requests
+note right of FrontEnd
+React/Vite user interface.
+Provides reviewer and dashboard
+screens.
+end note
+@enduml
+
+@startuml OrchestrationLayer
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Orchestration Layer" {
+  class FastAPIApp {
+    + registerRouters()
+    + health(): dict
+  }
+
+  class IngestionRouter {
+    + health(): dict
+    + ingest(event: RawEvent): IngestResponse
+  }
+
+  class ProcessingRouter {
+    + health(): dict
+    + preprocess(request: PreprocessRequest)
+    + analyze(request: AnalyzeRequest)
+    + runPipeline(request: PipelineRequest)
+  }
+
+  class SituationRouter {
+    + listSituations(status: str): list
+    + decideSituation(id: str, decision: str)
+    + analyticsSummary(): dict
+  }
+}
+
+FastAPIApp o-- IngestionRouter : registers
+FastAPIApp o-- ProcessingRouter : registers
+FastAPIApp o-- SituationRouter : registers
+
+note right of FastAPIApp
+One FastAPI process contains
+all routers. The application
+is a modular monolith.
+end note
+@enduml
+
+@startuml InputProcessingModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Input Processing Module" {
+  class DataSimulator <<external tool>> {
+    - datasetPath: str
+    - interval: float
+    + streamPosts()
+  }
+
+  class IngestionService {
+    + ingest(event: RawEvent): IngestResponse
+    + validate(event: RawEvent): bool
+    + enrichMetadata(event: RawEvent): dict
+  }
+
+  class QueueManager {
+    - maxSize: int
+    - queue: deque
+    + enqueue(item: QueueItem): EnqueueResponse
+    + dequeue(): QueueItem
+    + dropOldest()
+    + stats(): dict
+  }
+
+  class RawEvent {
+    + text: str
+    + createdAt: float
+    + attributes: dict
+  }
+
+  class IngestedEvent {
+    + id: str
+    + text: str
+    + createdAt: float
+    + ingestedAt: float
+    + metadata: dict
+  }
+
+  class QueueItem {
+    + id: str
+    + payload: dict
+    + enqueuedAt: float
+  }
+
+  class Preprocessor {
+    + cleanText(text: str): str
+    + validate(text: str): bool
+    + registerRepost(text: str): int
+    + preprocess(text: str): PreprocessResult
+  }
+
+  class PreprocessResult {
+    + text: str
+    + isValid: bool
+    + repostCount: int
+    + dropped: bool
+    + language: LanguageInfo
+  }
+
+  class LanguageDetector {
+    + detect(text: str): LanguageInfo
+    + detectByScript(text: str): str
+    + checkCodeMixed(text: str): bool
+  }
+
+  class LanguageInfo {
+    + lang: str
+    + isRomanized: bool
+    + isCodeMixed: bool
+  }
+}
+
+DataSimulator ..> IngestionService : sends posts
+IngestionService --> RawEvent : accepts
+IngestionService --> IngestedEvent : creates
+IngestionService --> QueueManager : enqueues
+QueueManager o-- "0..*" QueueItem
+QueueItem --> IngestedEvent : contains payload
+QueueManager --> Preprocessor : supplies item
+Preprocessor --> PreprocessResult : returns
+Preprocessor --> LanguageDetector
+LanguageDetector --> LanguageInfo
+
+note right of QueueManager
+The current implementation
+uses an in-memory FIFO deque.
+When full, the oldest item
+is removed.
+end note
+@enduml
+
+@startuml AnalysisModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Analysis Module" {
+  abstract class Model {
+    + predict(text: str): dict
+  }
+
+  class DisasterClassifier {
+    + isDisaster: bool
+    + confidence: float
+    + predict(text: str): dict
+  }
+
+  class NeedDetector {
+    - thresholds: dict
+    + departmentScores: dict
+    + predict(text: str): dict
+    + activeNeeds(scores: dict): list
+    + zeroShotFallback(text: str): dict
+  }
+
+  class SentimentAnalyzer {
+    + label: str
+    + confidence: float
+    + negativity: float
+    + predict(text: str): dict
+    + predictBatch(texts: list): list
+  }
+
+  class AnalysisEngine {
+    + analyze(text: str): AnalysisResult
+    + runPipeline(post: ProcessedPost): AnalysisResult
+  }
+
+  class Combiner {
+    + computeSeverity(sentiment: dict, needs: dict): float
+    + computeActionability(text: str): float
+    + combine(results: dict): AnalysisResult
+  }
+
+  class AnalysisResult {
+    + tweetId: str
+    + text: str
+    + lang: str
+    + isDisaster: bool
+    + disasterConfidence: float
+    + needs: dict
+    + sentiment: dict
+    + severity: float
+    + actionability: float
+    + embedding: list
+  }
+
+  class ProcessedPost {
+    + tweetId: str
+    + text: str
+    + createdAt: float
+    + lang: str
+  }
+}
+
+Model <|-- DisasterClassifier
+Model <|-- NeedDetector
+Model <|-- SentimentAnalyzer
+
+AnalysisEngine --> DisasterClassifier
+AnalysisEngine --> NeedDetector
+AnalysisEngine --> SentimentAnalyzer
+AnalysisEngine --> Combiner
+AnalysisEngine --> AnalysisResult : creates
+Combiner ..> DisasterClassifier : combines output
+Combiner ..> NeedDetector : combines output
+Combiner ..> SentimentAnalyzer : combines output
+ProcessedPost --> AnalysisEngine
+
+note right of AnalysisEngine
+Coordinates disaster,
+need, sentiment, and
+combined scoring operations.
+end note
+@enduml
+
+@startuml ClusteringModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Clustering Module" {
+  class EmbeddingGenerator {
+    + generate(text: str): list
+  }
+
+  class ClusterManager {
+    - similarityThreshold: float = 0.32
+    - departmentOverlap: float = 0.3
+    - timeWindowHours: float = 48
+    - minClusterSize: int = 3
+    - clusters: list
+    + assignPost(result: AnalysisResult): Cluster
+    + periodicRecluster(): int
+    + getSituations(): tuple
+    + clear()
+  }
+
+  class Cluster {
+    + clusterId: str
+    + members: list
+    + embeddings: list
+    + centroid: list
+    + createdAt: datetime
+    + updatedAt: datetime
+    + departmentRelevance: dict
+    + addPost(result: AnalysisResult)
+    + size(): int
+  }
+}
+
+ClusterManager --> EmbeddingGenerator : requests vector
+ClusterManager o-- "0..*" Cluster : manages
+Cluster o-- "1..*" AnalysisResult : contains
+ClusterManager ..> AnalysisResult : assigns
+
+note right of ClusterManager
+Posts are grouped using
+embedding similarity, time
+window, and department overlap.
+HDBSCAN can merge clusters
+during periodic reclustering.
+end note
+@enduml
+
+@startuml SituationModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Situation Module" {
+  class SituationManager {
+    + createSituation(cluster: Cluster): Situation
+    + listSituations(status: str): list
+    + approve(id: str): Situation
+    + reject(id: str): Situation
+    + updateStatus(id: str, status: str)
+  }
+
+  class Situation {
+    + id: str
+    + text: str
+    + language: str
+    + needs: dict
+    + sentiment: dict
+    + fakeScore: float
+    + priority: dict
+    + department: str
+    + summary: str
+    + evidence: list
+    + status: str
+    + createdAt: float
+  }
+
+  class Summarizer {
+    + summarize(cluster: Cluster): str
+  }
+
+  enum SituationStatus {
+    Pending
+    Confirmed
+    Rejected
+    Routed
+    Acknowledged
+    Resolved
+  }
+}
+
+SituationManager o-- "0..*" Situation
+SituationManager --> Cluster : receives
+SituationManager --> Summarizer
+Situation --> SituationStatus
+
+note right of SituationStatus
+Pending, Confirmed, and
+Rejected are currently used.
+Routed, Acknowledged, and
+Resolved are planned.
+end note
+
+note right of Summarizer
+The endpoint currently
+returns a shortened text
+result. Full model-based
+summarization is planned.
+end note
+@enduml
+
+@startuml EvidenceModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Evidence Module" {
+  class EvidenceManager {
+    + extract(cluster: Cluster, topK: int): list
+    + topPosts(cluster: Cluster): list
+    + store(evidence: Evidence)
+  }
+
+  class Evidence {
+    + id: str
+    + postId: str
+    + clusterId: str
+    + text: str
+    + metadata: dict
+  }
+
+  class PrivacyManager {
+    + maskPersonalDetails(text: str): str
+    + maskMetadata(metadata: dict): dict
+  }
+
+  class EvidenceRanker {
+    + rank(posts: list): list
+    + selectRepresentativePosts(posts: list, topK: int): list
+  }
+}
+
+EvidenceManager --> EvidenceRanker : selects posts
+EvidenceManager --> PrivacyManager : protects data
+EvidenceManager o-- "0..*" Evidence : manages
+EvidenceManager --> Cluster : reads members
+
+note right of PrivacyManager
+Masks phone numbers and
+sensitive metadata before
+evidence is stored.
+end note
+@enduml
+
+@startuml PersistentModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Persistent Module" {
+  class DatabaseClient {
+    - uri: str
+    - databaseName: str
+    + getCollection(name: str)
+    + save(collection: str, document: dict): str
+    + find(collection: str, query: dict): list
+    + findOne(collection: str, query: dict): dict
+    + update(collection: str, query: dict, values: dict): bool
+    + delete(collection: str, query: dict): bool
+  }
+
+  class MongoDB {
+    + situations
+    + evidence
+  }
+
+  class Situation
+  class Evidence
+}
+
+DatabaseClient --> MongoDB : uses Motor client
+MongoDB o-- Situation : stores
+MongoDB o-- Evidence : stores
+
+note right of DatabaseClient
+The current implementation
+is in backend/app/db.py.
+It provides shared asynchronous
+MongoDB helper functions.
+end note
+@enduml
+
+@startuml ReviewRoutingModule
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+package "Review and Routing Module" {
+  class ReviewService {
+    + approve(situation: Situation)
+    + reject(situation: Situation)
+    + castVote(situation: Situation, vote: ReviewVote)
+    + autoDemote(situation: Situation)
+  }
+
+  class ReviewVote {
+    + reviewerId: str
+    + vote: str
+    + timestamp: datetime
+  }
+
+  class RoutingService {
+    - queueMultiplier: dict
+    + route(situation: Situation)
+  }
+
+  class DepartmentQueue {
+    + department: str
+    + situations: list
+    + addSituation(situation: Situation)
+    + updateStatus(id: str, status: str)
+  }
+
+  class Situation
+}
+
+ReviewService --> Situation
+ReviewService o-- "0..*" ReviewVote
+ReviewService --> RoutingService : after approval
+RoutingService --> DepartmentQueue
+DepartmentQueue o-- "0..*" Situation
+
+note right of ReviewService
+Approve and reject are
+partially implemented.
+True/fake voting and
+automatic demotion are planned.
+end note
+
+note right of RoutingService
+Department queues and
+the officer lifecycle are
+planned functionality.
+end note
+@enduml
