@@ -1,0 +1,53 @@
+cluster_id,family,independent_reports,copies,languages,age_hours,rubric_band,severity,actionability,corroboration,credibility,recency,priority_current,band_current,priority_best,band_best,split,example_post
+S01,flood_trapped,6,1,en/hi/kn,1,Critical,0.782,0.816,0.77,0.682,0.891,0.784,Critical,0.813,Critical,held-out,"Jayanagar flooded, elderly people trapped inside homes, emergency help needed"
+S02,flood_trapped,4,0,en/hi,3,Critical,0.79,0.761,0.555,0.604,0.707,0.699,High,0.739,High,tuning,"Water rising fast at Yelahanka, people stuck on rooftops, please send boats now"
+S03,flood_trapped,3,2,en,5,Critical,0.779,0.821,0.405,0.735,0.561,0.686,High,0.751,Critical,tuning,"Water rising fast at Rajajinagar, people stuck on rooftops, please send boats now"
+S04,flood_trapped,2,0,en,2,High,0.824,0.832,0.321,0.887,0.794,0.732,High,0.802,Critical,tuning,"Rajajinagar flooded, elderly people trapped inside homes, emergency help needed"
+S05,flood_trapped,1,0,en,1,High,0.81,0.75,0.202,0.726,0.891,0.669,High,0.751,Critical,held-out,"Jayanagar flooded, elderly people trapped inside homes, emergency help needed"
+S06,flood_trapped,5,0,en/hi,14,High,0.78,0.84,0.62,0.773,0.198,0.704,High,0.72,High,tuning,"Water rising fast at Yelahanka, people stuck on rooftops, please send boats now"
+S07,flood_trapped,4,1,en/hi,30,Medium,0.818,0.809,0.555,0.77,0.031,0.677,High,0.679,High,tuning,"Rajajinagar flooded, elderly people trapped inside homes, emergency help needed"
+S08,fire_people,6,1,en/hi/kn,1,Critical,0.796,0.805,0.77,0.723,0.891,0.791,Critical,0.811,Critical,held-out,"Huge fire near Shivajinagar market, smoke everywhere, people stuck on top floor, urgent"
+S09,fire_people,4,0,en/hi,3,Critical,0.79,0.793,0.555,0.71,0.707,0.723,High,0.763,Critical,tuning,"Blaze at Jayanagar complex, residents trapped, need rescue immediately"
+S10,fire_people,3,2,en,5,Critical,0.863,0.651,0.405,0.81,0.561,0.68,High,0.665,High,tuning,"Fire in apartment building at Jayanagar, 34 people trapped inside, send fire engines now"
+S11,fire_people,2,0,en,2,High,0.807,0.483,0.321,0.882,0.794,0.639,High,0.59,High,tuning,"Fire in apartment building at Whitefield, 34 people trapped inside, send fire engines now"
+S12,fire_people,1,0,en,1,High,0.847,0.79,0.202,0.728,0.891,0.69,High,0.781,Critical,held-out,"Blaze at Shivajinagar complex, residents trapped, need rescue immediately"
+S13,fire_people,5,0,en/hi,14,High,0.825,0.643,0.62,0.634,0.198,0.647,High,0.602,High,tuning,"Fire in apartment building at Whitefield, 21 people trapped inside, send fire engines now"
+S14,fire_people,4,1,en/hi,30,Medium,0.836,0.76,0.555,0.779,0.031,0.672,High,0.653,High,tuning,"Fire in apartment building at Indiranagar, 3 people trapped inside, send fire engines now"
+S15,collapse_injured,6,1,en/hi/kn,1,Critical,0.871,0.753,0.77,0.688,0.891,0.796,Critical,0.789,Critical,tuning,"Old building fell down in Whitefield, people injured under debris, emergency"
+S16,collapse_injured,4,0,en/hi,3,Critical,0.85,0.711,0.555,0.743,0.707,0.726,High,0.725,High,held-out,"Building collapsed near Hebbal, 31 injured, ambulance needed urgently"
+S17,collapse_injured,3,2,en,5,Critical,0.908,0.706,0.321,0.722,0.561,0.678,High,0.696,High,held-out,"Wall collapse at Rajajinagar construction site, workers injured and trapped, send help"
+S18,collapse_injured,2,0,en,2,High,0.906,0.674,0.321,0.779,0.794,0.701,High,0.714,High,held-out,"Wall collapse at Yelahanka construction site, workers injured and trapped, send help"
+S19,collapse_injured,1,0,en,1,High,0.721,0.587,0.202,0.653,0.891,0.59,High,0.637,High,tuning,"Old building fell down in Whitefield, people injured under debris, emergency"
+S20,collapse_injured,5,0,en/hi,14,High,0.928,0.657,0.471,0.644,0.198,0.653,High,0.619,High,held-out,"Wall collapse at Malleswaram construction site, workers injured and trapped, send help"
+S21,collapse_injured,4,1,en/hi,30,Medium,0.831,0.701,0.471,0.715,0.031,0.629,High,0.609,High,held-out,"Old building fell down in Indiranagar, people injured under debris, emergency"
+S22,road_flooded,7,1,en/hi/kn,2,High,0.64,0.396,0.77,0.65,0.794,0.622,High,0.524,Medium,held-out,"Bridge on the Hebbal road damaged by rain, vehicles not allowed"
+S23,road_flooded,3,0,en/hi,6,High,0.542,0.433,0.471,0.721,0.5,0.523,Medium,0.476,Medium,held-out,"Roads submerged near Whitefield after heavy rain, traffic stopped for hours"
+S24,road_flooded,2,0,en,10,High,0.537,0.393,0.321,0.769,0.315,0.47,Medium,0.418,Medium,held-out,"Main road at Malleswaram under water, buses not running"
+S25,road_flooded,1,0,en,3,Medium,0.575,0.419,0.202,0.709,0.707,0.495,Medium,0.489,Medium,held-out,"Roads submerged near Malleswaram after heavy rain, traffic stopped for hours"
+S26,road_flooded,4,0,en/hi,20,Medium,0.511,0.48,0.555,0.684,0.099,0.497,Medium,0.442,Medium,tuning,"Main road at Indiranagar under water, buses not running"
+S27,power_outage,7,1,en/hi/kn,2,High,0.521,0.528,0.823,0.643,0.794,0.629,High,0.587,High,tuning,"No electricity in Shivajinagar for 7 hours after the storm, hospital on generator"
+S28,power_outage,3,0,en/hi,6,High,0.482,0.488,0.471,0.801,0.5,0.531,Medium,0.504,Medium,tuning,"Power cut across Rajajinagar since last night, transformers damaged"
+S29,power_outage,2,0,en,10,High,0.518,0.366,0.321,0.784,0.315,0.46,Medium,0.4,Medium,tuning,"Whole of Whitefield without power, electric wires fallen on the road"
+S30,power_outage,1,0,en,3,Medium,0.479,0.45,0.202,0.688,0.707,0.471,Medium,0.492,Medium,tuning,"No electricity in Malleswaram for 37 hours after the storm, hospital on generator"
+S31,power_outage,4,0,en/hi,20,Medium,0.507,0.402,0.555,0.579,0.099,0.46,Medium,0.389,Medium,held-out,"Whole of Yelahanka without power, electric wires fallen on the road"
+S32,hospital_full,7,1,en/hi,2,High,0.59,0.573,0.555,0.589,0.794,0.599,High,0.609,High,tuning,"No ICU beds available in Yelahanka, ambulances turned away"
+S33,hospital_full,3,0,en/hi,6,High,0.527,0.457,0.555,0.742,0.5,0.545,Medium,0.493,Medium,tuning,"Hebbal government hospital emergency ward overcrowded, patients waiting outside"
+S34,hospital_full,2,0,en,10,High,0.504,0.645,0.202,0.712,0.315,0.491,Medium,0.556,High,held-out,"Malleswaram government hospital emergency ward overcrowded, patients waiting outside"
+S35,hospital_full,1,0,en,3,Medium,0.512,0.734,0.202,0.716,0.707,0.556,High,0.669,High,held-out,"Shivajinagar government hospital emergency ward overcrowded, patients waiting outside"
+S36,hospital_full,4,0,en/hi,20,Medium,0.542,0.573,0.471,0.652,0.099,0.508,Medium,0.496,Medium,held-out,"Hebbal government hospital emergency ward overcrowded, patients waiting outside"
+S37,water_shortage,6,0,en/hi,4,Medium,0.417,0.34,0.555,0.529,0.63,0.464,Medium,0.415,Medium,tuning,Hebbal residents complaining about no water in taps
+S38,water_shortage,3,1,en,8,Medium,0.445,0.31,0.321,0.655,0.397,0.413,Medium,0.361,Medium,held-out,No drinking water supply in Yelahanka since yesterday
+S39,water_shortage,2,0,en,2,Low,0.389,0.422,0.321,0.774,0.794,0.482,Medium,0.486,Medium,held-out,No drinking water supply in Indiranagar since yesterday
+S40,water_shortage,4,0,en/hi,26,Low,0.414,0.349,0.555,0.652,0.05,0.425,Medium,0.339,Low,tuning,"Water shortage in Hebbal for 9 days, tanker not coming"
+S41,water_shortage,1,0,en,1,Low,0.445,0.323,0.202,0.654,0.891,0.442,Medium,0.437,Medium,tuning,"Water shortage in Yelahanka for 17 days, tanker not coming"
+S42,garbage_traffic,6,0,en/hi,4,Medium,0.384,0.395,0.555,0.504,0.63,0.463,Medium,0.442,Medium,tuning,Traffic jam near Hebbal because the signal is not working
+S43,garbage_traffic,3,1,en,8,Medium,0.403,0.327,0.321,0.624,0.397,0.4,Medium,0.363,Medium,tuning,"Drainage blocked in Whitefield, dirty water on the street"
+S44,garbage_traffic,2,0,en,2,Low,0.392,0.333,0.321,0.733,0.794,0.454,Medium,0.43,Medium,held-out,"Garbage not collected in Malleswaram for a week, bad smell everywhere"
+S45,garbage_traffic,4,0,en/hi,26,Low,0.363,0.362,0.555,0.592,0.05,0.404,Medium,0.336,Low,tuning,Traffic jam near Rajajinagar because the signal is not working
+S46,garbage_traffic,1,0,en,1,Low,0.344,0.397,0.202,0.664,0.891,0.432,Medium,0.467,Medium,tuning,"Drainage blocked in Jayanagar, dirty water on the street"
+S47,vague,1,0,en,1,Low,0.335,0.07,0.202,0.556,0.891,0.331,Low,0.264,Low,held-out,hope everyone is ok out there
+S48,vague,2,0,en,2,Low,0.38,0.101,0.321,0.66,0.794,0.382,Medium,0.285,Low,tuning,hope everyone is ok out there
+S49,vague,3,0,en,1,Low,0.358,0.131,0.405,0.638,0.891,0.406,Medium,0.318,Low,held-out,something bad happening near Whitefield i think
+S50,vague,1,0,en,8,Low,0.359,0.225,0.202,0.625,0.397,0.338,Low,0.29,Low,tuning,something bad happening near Yelahanka i think
+S51,vague,4,0,en,3,Low,0.383,0.163,0.405,0.593,0.707,0.396,Medium,0.311,Low,tuning,something bad happening near Whitefield i think
+S52,vague,2,0,en,14,Low,0.383,0.155,0.321,0.702,0.198,0.343,Low,0.231,Low,tuning,hope everyone is ok out there

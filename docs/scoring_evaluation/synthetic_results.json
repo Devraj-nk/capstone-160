@@ -1,0 +1,232 @@
+{
+ "rubric": "URGENCY RUBRIC (fixed before scoring; label depends only on the scenario):\n  life-threatening event (people trapped / injured / inside a fire, water entering homes) + urgent request\n      Critical  if >= 3 independent reports and last report <= 6 h old\n      High      if 1-2 independent reports, or last report 6-24 h old\n      Medium    if last report > 24 h old\n  serious harm / infrastructure failure (roads submerged, bridge damaged, wide power cut, hospital full)\n      High      if >= 2 independent reports and last report <= 12 h old\n      Medium    otherwise\n  service disruption (water shortage, garbage, traffic)\n      Medium    if >= 3 independent reports and last report <= 12 h old\n      Low       otherwise\n  vague / non-actionable (no concrete event, sympathy, hearsay)\n      Low",
+ "best_weights": {
+  "severity": 0.15,
+  "actionability": 0.6,
+  "corroboration": 0.05,
+  "credibility": 0.05,
+  "recency": 0.15
+ },
+ "current_weights": {
+  "severity": 0.3,
+  "actionability": 0.25,
+  "corroboration": 0.2,
+  "credibility": 0.15,
+  "recency": 0.1
+ },
+ "results": {
+  "v1 (Review 1)": {
+   "tuning": {
+    "exact": 0.6333333333333333,
+    "within_one": 1.0,
+    "band_error": 0.36666666666666664,
+    "n": 30
+   },
+   "held_out": {
+    "exact": 0.5,
+    "within_one": 1.0,
+    "band_error": 0.5,
+    "n": 22
+   }
+  },
+  "v2 (ESA)": {
+   "tuning": {
+    "exact": 0.43333333333333335,
+    "within_one": 0.9333333333333333,
+    "band_error": 0.6333333333333333,
+    "n": 30
+   },
+   "held_out": {
+    "exact": 0.5,
+    "within_one": 0.9545454545454546,
+    "band_error": 0.5454545454545454,
+    "n": 22
+   }
+  },
+  "current final": {
+   "tuning": {
+    "exact": 0.5,
+    "within_one": 1.0,
+    "band_error": 0.5,
+    "n": 30
+   },
+   "held_out": {
+    "exact": 0.5454545454545454,
+    "within_one": 1.0,
+    "band_error": 0.45454545454545453,
+    "n": 22
+   }
+  },
+  "best on tuning set": {
+   "tuning": {
+    "exact": 0.6666666666666666,
+    "within_one": 1.0,
+    "band_error": 0.3333333333333333,
+    "n": 30
+   },
+   "held_out": {
+    "exact": 0.5,
+    "within_one": 1.0,
+    "band_error": 0.5,
+    "n": 22
+   }
+  }
+ },
+ "cv": [
+  {
+   "weights": {
+    "severity": 0.15,
+    "actionability": 0.6,
+    "corroboration": 0.05,
+    "credibility": 0.05,
+    "recency": 0.15
+   },
+   "tuned": 0.45454545454545453,
+   "v1 (Review 1)": 0.45454545454545453,
+   "v2 (ESA)": 0.36363636363636365,
+   "current final": 0.5454545454545454
+  },
+  {
+   "weights": {
+    "severity": 0.3,
+    "actionability": 0.1,
+    "corroboration": 0.25,
+    "credibility": 0.05,
+    "recency": 0.3
+   },
+   "tuned": 0.5454545454545454,
+   "v1 (Review 1)": 0.5454545454545454,
+   "v2 (ESA)": 0.6363636363636364,
+   "current final": 0.5454545454545454
+  },
+  {
+   "weights": {
+    "severity": 0.35,
+    "actionability": 0.5,
+    "corroboration": 0.05,
+    "credibility": 0.05,
+    "recency": 0.05
+   },
+   "tuned": 0.6,
+   "v1 (Review 1)": 0.6,
+   "v2 (ESA)": 0.5,
+   "current final": 0.8
+  },
+  {
+   "weights": {
+    "severity": 0.25,
+    "actionability": 0.35,
+    "corroboration": 0.25,
+    "credibility": 0.1,
+    "recency": 0.05
+   },
+   "tuned": 0.3,
+   "v1 (Review 1)": 0.7,
+   "v2 (ESA)": 0.5,
+   "current final": 0.4
+  },
+  {
+   "weights": {
+    "severity": 0.3,
+    "actionability": 0.1,
+    "corroboration": 0.25,
+    "credibility": 0.05,
+    "recency": 0.3
+   },
+   "tuned": 0.4,
+   "v1 (Review 1)": 0.6,
+   "v2 (ESA)": 0.3,
+   "current final": 0.3
+  }
+ ],
+ "ablation": {
+  "severity": 0.5384615384615384,
+  "actionability": 0.5192307692307693,
+  "corroboration": 0.4807692307692308,
+  "credibility": 0.5576923076923077,
+  "recency": 0.5
+ },
+ "full_exact": 0.5192307692307693,
+ "sensitivity_range": [
+  0.4807692307692308,
+  0.5384615384615384
+ ],
+ "fake_flagged": [],
+ "priority_ranges_by_band": {
+  "Critical": [
+   0.6775050698142543,
+   0.7234448751874296,
+   0.7958999944729316
+  ],
+  "High": [
+   0.4600669969383812,
+   0.6287627233791367,
+   0.7319864650547119
+  ],
+  "Medium": [
+   0.39996894943913375,
+   0.49492975380315907,
+   0.6773624050480642
+  ],
+  "Low": [
+   0.33105894749853826,
+   0.4059242084972773,
+   0.481907223433704
+  ]
+ },
+ "spearman": 0.8393177581118307,
+ "cutoffs": {
+  "best_on_tuning": [
+   0.68,
+   0.53,
+   0.45
+  ],
+  "cv": [
+   {
+    "cuts": [
+     0.68,
+     0.53,
+     0.46
+    ],
+    "tuned": 0.45454545454545453,
+    "current": 0.5454545454545454
+   },
+   {
+    "cuts": [
+     0.67,
+     0.52,
+     0.45
+    ],
+    "tuned": 0.5454545454545454,
+    "current": 0.5454545454545454
+   },
+   {
+    "cuts": [
+     0.67,
+     0.52,
+     0.46
+    ],
+    "tuned": 0.7,
+    "current": 0.8
+   },
+   {
+    "cuts": [
+     0.72,
+     0.52,
+     0.46
+    ],
+    "tuned": 0.7,
+    "current": 0.4
+   },
+   {
+    "cuts": [
+     0.67,
+     0.56,
+     0.46
+    ],
+    "tuned": 0.6,
+    "current": 0.3
+   }
+  ]
+ }
+}
