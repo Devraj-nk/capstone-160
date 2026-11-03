@@ -4,6 +4,9 @@ from typing import Any
 
 
 EMBEDDING_MODEL_PATH = "l3cube-pune/indic-sentence-similarity-sbert"
+# Identifies the vector space of stored embeddings/centroids; the offline
+# backend overrides it. Vectors from different models are never mixed.
+EMBEDDING_MODEL_ID = EMBEDDING_MODEL_PATH
 
 _embedding_model: Any = None
 

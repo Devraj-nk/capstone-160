@@ -3,6 +3,8 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from ..analysis.summarization import summarize_texts
+
 router = APIRouter(prefix="/summarization", tags=["summarization"])
 
 
@@ -21,5 +23,4 @@ def health() -> dict:
 
 @router.post("/summarize", response_model=SummarizeResponse)
 def summarize(req: SummarizeRequest) -> SummarizeResponse:
-    # TODO: mT5-based summarization over the clustered posts
-    return SummarizeResponse(summary=" ".join(req.texts)[:280])
+    return SummarizeResponse(summary=summarize_texts(req.texts))

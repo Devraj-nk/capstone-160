@@ -53,10 +53,17 @@ def enqueue(item: QueueItem) -> EnqueueResponse:
     return enqueue_item(item)
 
 
+def dequeue_item() -> QueueItem | None:
+    """Pop the oldest item, or None if the queue is empty. Called directly by
+    the pipeline worker (same process) as well as via /queue/dequeue."""
+    return _queue.popleft() if _queue else None
+
+
+def queue_size() -> int:
+    return len(_queue)
+
+
 @router.post("/dequeue", response_model=DequeueResponse)
 def dequeue() -> DequeueResponse:
-    if not _queue:
-        return DequeueResponse(item=None, queue_size=0)
-
-    item = _queue.popleft()
+    item = dequeue_item()
     return DequeueResponse(item=item, queue_size=len(_queue))

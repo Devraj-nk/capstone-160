@@ -3,14 +3,13 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from ..db import EVIDENCE as COLLECTION
 from ..db import insert_document
 from ..evidence.privacy import mask_metadata, mask_personal_details
 from ..evidence.ranking import select_representative_posts
 from ..schemas.evidence import EvidenceItem, EvidencePost, StoredEvidence
 
 router = APIRouter(prefix="/evidence", tags=["evidence"])
-
-COLLECTION = "evidence"
 
 
 class ExtractRequest(BaseModel):

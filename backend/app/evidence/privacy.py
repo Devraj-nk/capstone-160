@@ -1,11 +1,34 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from typing import Any
+
+from ..config import AUTHOR_HASH_SALT
 
 _DIGIT_RUN_RE = re.compile(r"\+?\d[\d\-.\s]{5,}\d")
 
 _ADDRESS_KEY_HINTS = ("address", "location")
+
+# Source fields that identify the author; replaced by one salted hash.
+_AUTHOR_KEYS = ("user_id", "userid", "username", "user_name", "user", "screen_name", "handle",
+                "author", "author_id")
+
+
+def hash_author(value: Any) -> str:
+    """Salted, one-way author reference: enough to count distinct authors,
+    nothing more."""
+    digest = hashlib.sha256(f"{AUTHOR_HASH_SALT}:{value}".encode("utf-8")).hexdigest()
+    return f"hash:{digest[:16]}"
+
+
+def pseudonymize_attributes(attributes: dict[str, Any]) -> dict[str, Any]:
+    """Drop every username/handle/user-id field, keeping only `author_ref`."""
+    cleaned = {k: v for k, v in attributes.items() if k.lower() not in _AUTHOR_KEYS}
+    author = next((attributes[k] for k in attributes if k.lower() in _AUTHOR_KEYS and attributes[k]), None)
+    if author is not None:
+        cleaned["author_ref"] = hash_author(author)
+    return cleaned
 
 
 def _mask_if_phone(match: re.Match[str]) -> str:

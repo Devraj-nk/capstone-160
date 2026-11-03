@@ -1,0 +1,385 @@
+' ============================================================================
+' Per-module sequence and deployment diagrams
+' Disaster Information Analysis System
+'
+' Exactly two diagrams are provided for each of the eight modules:
+' one sequence diagram and one deployment diagram (16 diagrams total).
+' ============================================================================
+
+@startuml PresentationSequence
+ title Presentation Layer - Sequence Diagram
+ actor User
+ participant FrontEnd
+ participant APIClient
+ participant FastAPIApp
+ participant SituationRouter
+ database MongoDB
+
+ User -> FrontEnd : open review/dashboard
+ FrontEnd -> APIClient : request situations/analytics
+ APIClient -> FastAPIApp : HTTP GET request
+ FastAPIApp -> SituationRouter : route request
+ SituationRouter -> MongoDB : query situations
+ MongoDB --> SituationRouter : data
+ SituationRouter --> APIClient : JSON response
+ APIClient --> FrontEnd : parsed data
+ FrontEnd --> User : display page
+
+ alt reviewer decision
+   User -> FrontEnd : approve or reject situation
+   FrontEnd -> APIClient : submit decision
+   APIClient -> FastAPIApp : HTTP POST decision
+   FastAPIApp -> SituationRouter : update status
+   SituationRouter -> MongoDB : update situation
+   MongoDB --> SituationRouter : update result
+   SituationRouter --> FrontEnd : updated situation
+ end
+@enduml
+
+@startuml PresentationDeployment
+ title Presentation Layer - Deployment Diagram
+ actor User
+ node "Client Machine" {
+   node "Web Browser" {
+     artifact "React/Vite Frontend" as Frontend
+     component "Presentation Layer" as Presentation
+     component "API Client" as APIClient
+   }
+ }
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "FastAPI Application" as FastAPI
+     component "Situation Router" as SituationRouter
+   }
+ }
+ User --> Frontend : uses
+ Frontend --> Presentation : renders
+ Presentation --> APIClient : calls
+ APIClient --> FastAPI : HTTP/JSON
+ FastAPI --> SituationRouter : routes request
+@enduml
+
+@startuml OrchestrationSequence
+ title Orchestration Layer - Sequence Diagram
+ actor Client
+ participant FastAPIApp
+ participant IngestionRouter
+ participant ProcessingRouter
+ participant SituationRouter
+ participant ModuleService
+
+ Client -> FastAPIApp : send HTTP request
+ FastAPIApp -> FastAPIApp : validate middleware/CORS
+ alt ingestion request
+   FastAPIApp -> IngestionRouter : route request
+   IngestionRouter -> ModuleService : invoke ingestion logic
+ else processing request
+   FastAPIApp -> ProcessingRouter : route request
+   ProcessingRouter -> ModuleService : invoke processing logic
+ else situation request
+   FastAPIApp -> SituationRouter : route request
+   SituationRouter -> ModuleService : invoke situation logic
+ end
+ ModuleService --> FastAPIApp : operation result
+ FastAPIApp --> Client : HTTP/JSON response
+@enduml
+
+@startuml OrchestrationDeployment
+ title Orchestration Layer - Deployment Diagram
+ node "Application Host" {
+   node "Python Runtime" {
+     artifact "app/main.py" as Main
+     component "FastAPIApp" as FastAPI
+     component "IngestionRouter" as Ingestion
+     component "ProcessingRouter" as Processing
+     component "SituationRouter" as Situation
+   }
+ }
+ node "Client or Tool Host" {
+   component "HTTP Client" as Client
+ }
+ Client --> FastAPI : HTTP/JSON
+ Main ..> FastAPI : starts
+ FastAPI *-- Ingestion
+ FastAPI *-- Processing
+ FastAPI *-- Situation
+@enduml
+
+@startuml InputProcessingSequence
+ title Input Processing Module - Sequence Diagram
+ actor "CSV Producer" as Producer
+ participant IngestionService
+ participant QueueManager
+ participant Preprocessor
+ participant LanguageDetector
+ participant AnalysisEngine
+
+ Producer -> IngestionService : submit RawEvent
+ IngestionService -> IngestionService : validate and enrich event
+ IngestionService -> QueueManager : enqueue QueueItem
+ QueueManager --> IngestionService : enqueue response
+ QueueManager -> Preprocessor : dequeue item
+ Preprocessor -> Preprocessor : clean and deduplicate text
+ Preprocessor -> LanguageDetector : detect language
+ LanguageDetector --> Preprocessor : LanguageInfo
+ Preprocessor --> AnalysisEngine : PreprocessResult
+ AnalysisEngine --> Producer : processed event response
+@enduml
+
+@startuml InputProcessingDeployment
+ title Input Processing Module - Deployment Diagram
+ node "Tools Host" {
+   artifact "CSV Dataset" as Dataset
+   component "CSV Producer" as Producer
+ }
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "Ingestion Service" as Ingestion
+     component "Queue Manager" as Queue
+     component "Preprocessor" as Preprocessor
+     component "Language Detector" as Language
+   }
+ }
+ Producer --> Dataset : reads
+ Producer --> Ingestion : HTTP POST
+ Ingestion --> Queue : function call
+ Queue --> Preprocessor : queued event
+ Preprocessor --> Language : function call
+@enduml
+
+@startuml AnalysisSequence
+ title Analysis Module - Sequence Diagram
+ participant ProcessingRouter
+ participant AnalysisEngine
+ participant DisasterClassifier
+ participant NeedDetector
+ participant SentimentAnalyzer
+ participant FakeNewsScorer
+ participant PriorityScorer
+ participant Combiner
+ participant ClusterManager
+
+ ProcessingRouter -> AnalysisEngine : analyze ProcessedPost
+ AnalysisEngine -> DisasterClassifier : classify text
+ DisasterClassifier --> AnalysisEngine : disaster result
+ AnalysisEngine -> NeedDetector : detect needs
+ NeedDetector --> AnalysisEngine : need scores
+ AnalysisEngine -> SentimentAnalyzer : analyze sentiment
+ SentimentAnalyzer --> AnalysisEngine : sentiment result
+ AnalysisEngine -> FakeNewsScorer : score reliability risk
+ FakeNewsScorer --> AnalysisEngine : fake-news result
+ AnalysisEngine -> PriorityScorer : calculate priority
+ PriorityScorer --> AnalysisEngine : priority result
+ AnalysisEngine -> Combiner : combine model outputs
+ Combiner --> AnalysisEngine : AnalysisResult
+ AnalysisEngine --> ClusterManager : send AnalysisResult
+@enduml
+
+@startuml AnalysisDeployment
+ title Analysis Module - Deployment Diagram
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "Analysis Engine" as Engine
+     component "Disaster Classifier" as Disaster
+     component "Need Detector" as Needs
+     component "Sentiment Analyzer" as Sentiment
+     component "Fake-News Scorer" as FakeNews
+     component "Priority Scorer" as Priority
+     component "Combiner" as Combiner
+   }
+   node "ML Runtime" {
+     artifact "Transformer Models" as Models
+     artifact "PyTorch Runtime" as Torch
+   }
+ }
+ ProcessingRouter --> Engine
+ Engine --> Disaster
+ Engine --> Needs
+ Engine --> Sentiment
+ Engine --> FakeNews
+ Engine --> Priority
+ Engine --> Combiner
+ Disaster --> Models
+ Needs --> Models
+ Sentiment --> Models
+ FakeNews --> Models
+ Models --> Torch
+@enduml
+
+@startuml ClusteringSequence
+ title Clustering Module - Sequence Diagram
+ participant AnalysisEngine
+ participant ClusterManager
+ participant EmbeddingGenerator
+ participant Cluster
+ participant SituationManager
+
+ AnalysisEngine -> ClusterManager : assign AnalysisResult
+ ClusterManager -> EmbeddingGenerator : generate embedding
+ EmbeddingGenerator --> ClusterManager : vector
+ ClusterManager -> ClusterManager : compare similarity/time/needs
+ alt suitable cluster found
+   ClusterManager -> Cluster : add member
+   Cluster --> ClusterManager : updated centroid
+ else no suitable cluster
+   ClusterManager -> Cluster : create new cluster
+ end
+ ClusterManager --> AnalysisEngine : cluster assignment
+ ClusterManager -> SituationManager : send significant cluster
+@enduml
+
+@startuml ClusteringDeployment
+ title Clustering Module - Deployment Diagram
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "Clustering Router" as Router
+     component "Cluster Manager" as Manager
+     component "Embedding Generator" as Embedding
+     component "Cluster" as Cluster
+   }
+   node "ML Runtime" {
+     artifact "Embedding Model" as Model
+     artifact "HDBSCAN Library" as HDBSCAN
+   }
+ }
+ Router --> Manager
+ Manager --> Embedding
+ Manager o-- Cluster
+ Embedding --> Model
+ Manager --> HDBSCAN : periodic reclustering
+@enduml
+
+@startuml SituationSequence
+ title Situation Module - Sequence Diagram
+ participant ClusterManager
+ participant SituationManager
+ participant Summarizer
+ participant Situation
+ participant DatabaseClient
+ actor Reviewer
+ participant SituationRouter
+
+ ClusterManager -> SituationManager : submit significant cluster
+ SituationManager -> Summarizer : generate summary
+ Summarizer --> SituationManager : summary
+ SituationManager -> Situation : create pending situation
+ SituationManager -> DatabaseClient : save situation
+ DatabaseClient --> SituationManager : stored ID
+ Reviewer -> SituationRouter : approve/reject situation
+ SituationRouter -> SituationManager : update decision
+ SituationManager -> DatabaseClient : update status
+ DatabaseClient --> SituationRouter : updated situation
+ SituationRouter --> Reviewer : decision result
+@enduml
+
+@startuml SituationDeployment
+ title Situation Module - Deployment Diagram
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "Situation Router" as Router
+     component "Situation Manager" as Manager
+     component "Summarizer" as Summarizer
+     component "Situation Model" as Situation
+   }
+   node "ML Runtime" {
+     artifact "Summarization Model or Fallback" as SummaryModel
+   }
+   component "Database Client" as DatabaseClient
+ }
+ Router --> Manager
+ Manager --> Summarizer
+ Manager --> Situation
+ Summarizer --> SummaryModel
+ Manager --> DatabaseClient : persistence call
+@enduml
+
+@startuml EvidenceSequence
+ title Evidence Module - Sequence Diagram
+ participant SituationManager
+ participant EvidenceManager
+ participant EvidenceRanker
+ participant PrivacyManager
+ participant DatabaseClient
+ participant Evidence
+
+ SituationManager -> EvidenceManager : request evidence for situation
+ EvidenceManager -> EvidenceRanker : select representative posts
+ EvidenceRanker --> EvidenceManager : selected posts
+ EvidenceManager -> PrivacyManager : mask text and metadata
+ PrivacyManager --> EvidenceManager : protected data
+ EvidenceManager -> Evidence : create evidence records
+ EvidenceManager -> DatabaseClient : store evidence
+ DatabaseClient --> EvidenceManager : stored evidence IDs
+ EvidenceManager --> SituationManager : evidence list
+@enduml
+
+@startuml EvidenceDeployment
+ title Evidence Module - Deployment Diagram
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "Evidence Router" as Router
+     component "Evidence Manager" as Manager
+     component "Evidence Ranker" as Ranker
+     component "Privacy Manager" as Privacy
+     component "Evidence Model" as Evidence
+   }
+   component "Database Client" as DatabaseClient
+ }
+ Router --> Manager
+ Manager --> Ranker
+ Manager --> Privacy
+ Manager --> Evidence
+ Manager --> DatabaseClient : persistence call
+@enduml
+
+@startuml PersistentSequence
+ title Persistent Module - Sequence Diagram
+ participant SituationManager
+ participant EvidenceManager
+ participant SituationRouter
+ participant DatabaseClient
+ database MongoDB
+
+ alt store situation
+   SituationManager -> DatabaseClient : insertDocument("situations", document)
+   DatabaseClient -> MongoDB : insert document
+   MongoDB --> DatabaseClient : insert result
+   DatabaseClient --> SituationManager : document ID
+ else store evidence
+   EvidenceManager -> DatabaseClient : insertDocument("evidence", document)
+   DatabaseClient -> MongoDB : insert document
+   MongoDB --> DatabaseClient : insert result
+   DatabaseClient --> EvidenceManager : document ID
+ else retrieve or update situation
+   SituationRouter -> DatabaseClient : find/update document
+   DatabaseClient -> MongoDB : query/update
+   MongoDB --> DatabaseClient : database result
+   DatabaseClient --> SituationRouter : mapped result
+ end
+@enduml
+
+@startuml PersistentDeployment
+ title Persistent Module - Deployment Diagram
+ node "Application Host" {
+   node "FastAPI Process" {
+     component "Database Client" as Client
+     artifact "Motor Async Driver" as Motor
+   }
+ }
+ database "MongoDB Server" as Mongo {
+   artifact "situations collection" as Situations
+   artifact "evidence collection" as Evidence
+ }
+ SituationManager --> Client : uses
+ EvidenceManager --> Client : uses
+ SituationRouter --> Client : uses
+ Client --> Motor
+ Motor --> Mongo : MongoDB protocol
+ Mongo o-- Situations
+ Mongo o-- Evidence
+
+ note right of Client
+ The current implementation uses shared
+ module-level asynchronous database helpers.
+ end note
+@enduml

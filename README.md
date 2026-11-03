@@ -157,7 +157,14 @@ pytest, run `python backend/tools/trace_pipeline.py`. This offline trace
 uses deterministic model stubs and an in-memory MongoDB, then prints the results
 of preprocessing, analysis, clustering, evidence extraction, and evidence storage.
 
-Endpoint stubs currently pass data through unchanged or return placeholder values — swap in the real model/logic per router's TODOs. `backend/app/routers/situations.py` is the one new piece with no earlier equivalent: it's the API contract the React frontend actually calls (`GET /situations`, `POST /situations/{id}/decision`, `GET /analytics/summary`), backed by MongoDB.
+End to end: start the backend (its background worker drains the queue through every step),
+stream the sample data in with `python tools/simulator/csv_producer.py` from `backend/`, then
+review the resulting situations in the frontend. Without torch/transformers installed the
+backend falls back to offline keyword/hashing stand-ins for the models (`MODEL_BACKEND`, see
+[backend/README.md](backend/README.md#end-to-end-pipeline)); install the full
+`requirements.txt` to use the fine-tuned models. `backend/app/routers/situations.py` is the
+API contract the React frontend calls (`GET /situations`, `POST /situations/{id}/decision`,
+`GET /analytics/summary`), backed by MongoDB.
 
 ## Team
 

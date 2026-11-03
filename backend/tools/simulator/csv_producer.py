@@ -5,6 +5,7 @@ import asyncio
 import csv
 import random
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -17,20 +18,34 @@ def _normalize_text(s: str) -> str:
 def _row_attributes(
     row: dict[str, str],
     *,
+    text_col: str,
     tweet_id_col: str,
-    label_col: str,
-    label_id_col: str,
 ) -> dict[str, Any]:
-    attrs: dict[str, Any] = {}
-
-    if tweet_id_col in row and row[tweet_id_col] != "":
-        attrs["tweet_id"] = row[tweet_id_col]
-    if label_col in row and row[label_col] != "":
-        attrs["label"] = row[label_col]
-    if label_id_col in row and row[label_id_col] != "":
-        attrs["label_id"] = row[label_id_col]
-
+    """Every non-empty column except the text becomes an attribute (the
+    pipeline reads tweet_id, and later stages use account/location fields);
+    the id column is always exposed as "tweet_id"."""
+    attrs: dict[str, Any] = {
+        key: value for key, value in row.items() if key and key != text_col and value not in (None, "")
+    }
+    if tweet_id_col in attrs:
+        attrs["tweet_id"] = attrs.pop(tweet_id_col)
     return attrs
+
+
+def _row_created_at(row: dict[str, str], timestamp_col: str | None) -> float:
+    """The row's own timestamp (ISO-8601 or unix seconds) when asked for and
+    parseable, else now — so replayed data can keep its original timing."""
+    raw = (row.get(timestamp_col) or "").strip() if timestamp_col else ""
+    if raw:
+        try:
+            return float(raw)
+        except ValueError:
+            pass
+        try:
+            return datetime.fromisoformat(raw.replace("Z", "+00:00")).timestamp()
+        except ValueError:
+            pass
+    return time.time()
 
 
 async def _stream_csv(
@@ -39,8 +54,7 @@ async def _stream_csv(
     ingestion_url: str,
     text_col: str,
     tweet_id_col: str,
-    label_col: str,
-    label_id_col: str,
+    timestamp_col: str | None,
     interval: float,
     min_interval: float | None,
     max_interval: float | None,
@@ -85,13 +99,8 @@ async def _stream_csv(
                     sent += 1
                     payload = {
                         "text": text,
-                        "created_at": time.time(),
-                        "attributes": _row_attributes(
-                            row,
-                            tweet_id_col=tweet_id_col,
-                            label_col=label_col,
-                            label_id_col=label_id_col,
-                        ),
+                        "created_at": _row_created_at(row, timestamp_col),
+                        "attributes": _row_attributes(row, text_col=text_col, tweet_id_col=tweet_id_col),
                     }
 
                     try:
@@ -123,15 +132,18 @@ async def main() -> None:
     )
     parser.add_argument(
         "--csv-path",
-        default="../ingestion_ds.csv",
+        default="ingestion.csv",
         help="Path to CSV file (with header)",
     )
     parser.add_argument("--ingestion-url", default="http://127.0.0.1:8000/ingestion/ingest")
 
-    parser.add_argument("--text-column", default="text_clean")
-    parser.add_argument("--tweet-id-column", default="tweet_id")
-    parser.add_argument("--label-column", default="label")
-    parser.add_argument("--label-id-column", default="label_id")
+    parser.add_argument("--text-column", default="text")
+    parser.add_argument("--tweet-id-column", default="post_id")
+    parser.add_argument(
+        "--timestamp-column",
+        default=None,
+        help="Use this column as created_at (ISO-8601 or unix seconds); default: send time",
+    )
 
     parser.add_argument(
         "--interval",
@@ -176,8 +188,7 @@ async def main() -> None:
         ingestion_url=args.ingestion_url,
         text_col=args.text_column,
         tweet_id_col=args.tweet_id_column,
-        label_col=args.label_column,
-        label_id_col=args.label_id_column,
+        timestamp_col=args.timestamp_column,
         interval=args.interval,
         min_interval=args.min_interval,
         max_interval=args.max_interval,

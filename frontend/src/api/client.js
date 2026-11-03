@@ -11,18 +11,64 @@ async function request(path, options = {}) {
   return res.json();
 }
 
+// The review queue: undecided situations, including ones auto-routed because
+// no reviewer decided in time (they still need a human verdict).
 export function getPendingSituations() {
-  return request("/situations?status=pending");
+  return request("/situations?status=pending&status=auto_routed");
 }
 
 export function getConfirmedSituations() {
   return request("/situations?status=confirmed");
 }
 
-export function decideSituation(id, decision) {
+export function decideSituation(id, decision, note) {
   return request(`/situations/${id}/decision`, {
     method: "POST",
-    body: JSON.stringify({ decision }),
+    body: JSON.stringify({ decision, note: note || null }),
+  });
+}
+
+export function getPipelineStats() {
+  return request("/pipeline/stats");
+}
+
+export function getResponseMetrics() {
+  return request("/analytics/response");
+}
+
+export function getTrends() {
+  return request("/analytics/trends");
+}
+
+export function getHeatmaps() {
+  return request("/analytics/heatmaps");
+}
+
+export function listDailyReports() {
+  return request("/reports/daily");
+}
+
+export function getDailyReport(day) {
+  return request(`/reports/daily/${day}`);
+}
+
+export function getTodayReport() {
+  return request("/reports/daily/today");
+}
+
+export function rebuildDailyReport(day) {
+  return request(`/reports/daily/${day}`, { method: "POST" });
+}
+
+export function getTickets(department) {
+  const query = department ? `?department=${encodeURIComponent(department)}` : "";
+  return request(`/tickets${query}`);
+}
+
+export function updateTicket(id, status) {
+  return request(`/tickets/${id}/status`, {
+    method: "POST",
+    body: JSON.stringify({ status }),
   });
 }
 

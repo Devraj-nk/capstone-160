@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
+
+# Tests drive the pipeline explicitly and supply their own model stubs below.
+os.environ.setdefault("PIPELINE_WORKER_ENABLED", "false")
+os.environ.setdefault("MODEL_BACKEND", "hf")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -9,7 +14,8 @@ import pytest
 from mongomock_motor import AsyncMongoMockClient
 
 from app import db as db_module
-from app.analysis import disaster_classification, need_detection, sentiment
+from app.analysis import clustering, disaster_classification, need_detection, sentiment
+from app.pipeline.orchestrator import orchestrator
 from app.preprocessing import deduplication, language
 from app.routers import queue as queue_module
 
@@ -30,7 +36,7 @@ def reset_in_memory_pipeline_state():
     in-process state (by design, same as production) — reset both before
     each test so results don't depend on test order."""
     queue_module._queue.clear()
-    deduplication._repost_counts.clear()
+    orchestrator.reset()  # clusters, repost counts, pipeline stats
     yield
 
 

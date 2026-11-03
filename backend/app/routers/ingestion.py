@@ -15,8 +15,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
-@router.post("/ingest", response_model=IngestResponse)
-def ingest(evt: RawEvent) -> IngestResponse:
+def build_ingested_event(evt: RawEvent) -> IngestedEvent:
     metadata: dict[str, Any] = {
         "pipeline": "demo",
         "schema_version": 1,
@@ -25,11 +24,16 @@ def ingest(evt: RawEvent) -> IngestResponse:
     if evt.attributes:
         metadata["attributes"] = evt.attributes
 
-    ingested = IngestedEvent(
+    return IngestedEvent(
         text=evt.text,
         created_at=evt.created_at,
         metadata=metadata,
     )
+
+
+@router.post("/ingest", response_model=IngestResponse)
+def ingest(evt: RawEvent) -> IngestResponse:
+    ingested = build_ingested_event(evt)
 
     queue_item = QueueItem(id=ingested.id, payload=ingested.model_dump())
     enqueue_result = enqueue_item(queue_item)
