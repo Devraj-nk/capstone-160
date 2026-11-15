@@ -27,8 +27,9 @@ DAY = 24 * HOUR
 BANDS = ("Critical", "High", "Medium", "Low")
 NEEDS = tuple(DEPARTMENT_BY_NEED)  # healthcare, municipal, law, tourism
 DEPARTMENTS = (*DEPARTMENT_BY_NEED.values(), DEFAULT_DEPARTMENT)
-ACTIVE_STATUSES = ("pending", "auto_routed", "confirmed")
-ROUTED_STATUSES = ("auto_routed", "confirmed")
+# "fake" = a reviewer flagged it as possibly fake; it is still routed (flagged).
+ACTIVE_STATUSES = ("pending", "auto_routed", "confirmed", "fake")
+ROUTED_STATUSES = ("auto_routed", "confirmed", "fake")
 OPEN_TICKET_STATUSES = ("routed", "acknowledged")
 LANGUAGE_ORDER = ("en", "hi", "kn", "ta", "te")
 

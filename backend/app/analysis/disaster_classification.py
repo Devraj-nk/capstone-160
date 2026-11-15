@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-MODEL_PATH = "Favaz-07/diaster-classifier-xlmr"
+MODEL_PATH = "Favaz-07/disaster-classifier-xlmr"
 DEFAULT_THRESHOLD = 0.5
 
 # Per-language decision thresholds (tuned separately for each language rather
@@ -19,8 +19,10 @@ def _load_model():
     if _model is None:
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-        _tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-        _model = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH)
+        from .model_store import model_source
+
+        _tokenizer = AutoTokenizer.from_pretrained(model_source(MODEL_PATH))
+        _model = AutoModelForSequenceClassification.from_pretrained(model_source(MODEL_PATH))
         _model.eval()
     return _tokenizer, _model
 

@@ -21,11 +21,15 @@ def _event(status: str, by: str, at: float) -> dict[str, Any]:
     return TicketEvent(status=status, by=by, at=at).model_dump()
 
 
-async def open_tickets(situation: dict[str, Any], by: str = "reviewer", verified: bool = True) -> list[str]:
+async def open_tickets(
+    situation: dict[str, Any], by: str = "reviewer", verified: bool = True, reviewer_flag: str | None = None
+) -> list[str]:
     """Route a situation. Idempotent: re-approving never duplicates a ticket; a
     previously cancelled ticket is reopened; a resolved one stays resolved.
     verified=False marks tickets opened by auto-escalation (no reviewer yet);
-    a later reviewer approval flips them to verified."""
+    a later reviewer approval flips them to verified. reviewer_flag="fake"
+    routes the situation anyway, marked as flagged by a reviewer; a later
+    approval clears the flag."""
     now = time.time()
     priority = situation.get("priority") or {}
     ids: list[str] = []
@@ -43,6 +47,7 @@ async def open_tickets(situation: dict[str, Any], by: str = "reviewer", verified
                 summary=situation.get("summary"),
                 summary_i18n=situation.get("summary_i18n") or {},
                 verified=verified,
+                reviewer_flag=reviewer_flag,
                 history=[TicketEvent(status="routed", by=by, at=now)],
                 created_at=now,
                 updated_at=now,
@@ -55,8 +60,10 @@ async def open_tickets(situation: dict[str, Any], by: str = "reviewer", verified
         if existing["status"] == "cancelled":
             update["status"] = "routed"
             push = _event("routed", by, now)
-        if verified and not existing.get("verified", True):
-            update["verified"] = True
+        if existing.get("verified", True) != verified and (verified or reviewer_flag):
+            update["verified"] = verified  # approval verifies; a fake flag un-verifies
+        if existing.get("reviewer_flag") != reviewer_flag and by == "reviewer":
+            update["reviewer_flag"] = reviewer_flag
         if len(update) > 1:
             change: dict[str, Any] = {"$set": update}
             if push:

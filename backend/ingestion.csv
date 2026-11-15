@@ -1,61 +1,137 @@
 post_id,text,timestamp,source,language,user_id,followers_count,verified,location,retweet_count,like_count
-1,"Flood in my area, need help urgently!",2026-04-21T21:10:01Z,twitter,en,usr_101,120,false,Bangalore,12,45
-2,"भारी बारिश के कारण सड़क बंद है, मदद चाहिए",2026-04-21T21:10:03Z,twitter,hi,usr_102,340,false,Delhi,5,20
-3,"Power outage since morning, no updates from authorities",2026-04-21T21:10:06Z,reddit,en,usr_103,89,false,Mumbai,2,10
-4,"ನಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ನೀರು ತುಂಬಿದೆ, ಸಹಾಯ ಬೇಕು",2026-04-21T21:10:08Z,twitter,kn,usr_104,560,true,Bangalore,25,80
-5,"Fire broke out near market, people trapped!",2026-04-21T21:10:10Z,twitter,en,usr_105,1020,true,Chennai,40,150
-6,"Water shortage in our locality for 3 days",2026-04-21T21:10:12Z,reddit,en,usr_106,76,false,Hyderabad,3,15
-7,"Accident on highway, traffic jam for hours",2026-04-21T21:10:15Z,twitter,en,usr_107,210,false,Pune,8,33
-8,"कोई एम्बुलेंस उपलब्ध नहीं है, स्थिति गंभीर है",2026-04-21T21:10:18Z,twitter,hi,usr_108,430,true,Delhi,18,60
-9,"Garbage not collected, causing health issues",2026-04-21T21:10:20Z,reddit,en,usr_109,65,false,Kolkata,1,5
-10,"Tourist place overcrowded, no safety measures",2026-04-21T21:10:22Z,twitter,en,usr_110,150,false,Goa,6,25
-11,"Heavy landslide reported in hill area",2026-04-21T21:10:25Z,twitter,en,usr_111,890,true,Shimla,30,120
-12,"ಬೆಂಕಿ ಅವಘಡ ಸಂಭವಿಸಿದೆ, ತಕ್ಷಣ ನೆರವು ಅಗತ್ಯ",2026-04-21T21:10:28Z,twitter,kn,usr_112,300,false,Mysore,10,40
-13,"No police response despite multiple complaints",2026-04-21T21:10:30Z,reddit,en,usr_113,54,false,Delhi,2,12
-14,"Flood water entering homes, situation worsening",2026-04-21T21:10:33Z,twitter,en,usr_114,670,true,Patna,22,90
-15,"Hospital overcrowded, no beds available",2026-04-21T21:10:36Z,twitter,en,usr_115,980,true,Mumbai,35,140
-16,"पानी की समस्या बहुत गंभीर हो गई है",2026-04-21T21:10:38Z,twitter,hi,usr_116,210,false,Jaipur,7,28
-17,"Road completely damaged after rain",2026-04-21T21:10:40Z,reddit,en,usr_117,33,false,Chandigarh,1,6
-18,"Tourists stranded due to sudden weather change",2026-04-21T21:10:43Z,twitter,en,usr_118,410,false,Manali,9,35
-19,"Electric wires fallen, dangerous situation",2026-04-21T21:10:45Z,twitter,en,usr_119,500,true,Bangalore,15,55
-20,"ಸರ್ಕಾರಿ ಸಹಾಯ ಇನ್ನೂ ಬಂದಿಲ್ಲ",2026-04-21T21:10:48Z,twitter,kn,usr_120,275,false,Hubli,6,22
-21,"Severe flooding near river bank, people evacuating",2026-04-21T21:11:01Z,twitter,en,usr_121,1450,true,Patna,55,210
-22,"पुल टूट गया है, यातायात बंद है",2026-04-21T21:11:03Z,twitter,hi,usr_122,320,false,Varanasi,12,40
-23,"No drinking water supply since yesterday",2026-04-21T21:11:05Z,reddit,en,usr_123,78,false,Hyderabad,3,14
-24,"Heavy rain causing traffic congestion everywhere",2026-04-21T21:11:07Z,twitter,en,usr_124,210,false,Bangalore,9,31
+1,"Flood in my area near Koramangala 4th block, need help urgently!",2026-04-21T21:10:01Z,twitter,en,usr_101,120,false,Bangalore,12,45
+2,"दिल्ली के लाजपत नगर में भारी बारिश के कारण सड़क बंद है, मदद चाहिए",2026-04-21T21:10:03Z,twitter,hi,usr_102,340,false,Delhi,5,20
+3,"Power outage in Andheri East since morning, no updates from authorities",2026-04-21T21:10:06Z,reddit,en,usr_103,89,false,Mumbai,2,10
+4,"ಜಯನಗರದ ನಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ನೀರು ತುಂಬಿದೆ, ಸಹಾಯ ಬೇಕು",2026-04-21T21:10:08Z,twitter,kn,usr_104,560,true,Bangalore,25,80
+5,"Fire broke out near Egmore market, people trapped!",2026-04-21T21:10:10Z,twitter,en,usr_105,1020,true,Chennai,40,150
+6,Water shortage in Kukatpally for 3 days,2026-04-21T21:10:12Z,reddit,en,usr_106,76,false,Hyderabad,3,15
+7,"Accident on the expressway near Lonavala, traffic jam for hours",2026-04-21T21:10:15Z,twitter,en,usr_107,210,false,Pune,8,33
+8,"द्वारका में कोई एम्बुलेंस उपलब्ध नहीं है, स्थिति गंभीर है",2026-04-21T21:10:18Z,twitter,hi,usr_108,430,true,Delhi,18,60
+9,"Garbage not collected in Behala for a week, causing health issues",2026-04-21T21:10:20Z,reddit,en,usr_109,65,false,Kolkata,1,5
+10,"Baga beach overcrowded, no safety measures",2026-04-21T21:10:22Z,twitter,en,usr_110,150,false,Goa,6,25
+11,Heavy landslide reported near Kufri in the Shimla hills,2026-04-21T21:10:25Z,twitter,en,usr_111,890,true,Shimla,30,120
+12,"ವಿಜಯನಗರದಲ್ಲಿ ಬೆಂಕಿ ಅವಘಡ ಸಂಭವಿಸಿದೆ, ತಕ್ಷಣ ನೆರವು ಅಗತ್ಯ",2026-04-21T21:10:28Z,twitter,kn,usr_112,300,false,Mysore,10,40
+13,No police response in Saket despite multiple complaints,2026-04-21T21:10:30Z,reddit,en,usr_113,54,false,Delhi,2,12
+14,"Flood water entering homes in Kankarbagh, situation worsening",2026-04-21T21:10:33Z,twitter,en,usr_114,670,true,Patna,22,90
+15,"Hospital in Parel overcrowded, no beds available",2026-04-21T21:10:36Z,twitter,en,usr_115,980,true,Mumbai,35,140
+16,जयपुर के मालवीय नगर में पानी की समस्या बहुत गंभीर हो गई है,2026-04-21T21:10:38Z,twitter,hi,usr_116,210,false,Jaipur,7,28
+17,Road completely damaged after rain near Zirakpur,2026-04-21T21:10:40Z,reddit,en,usr_117,33,false,Chandigarh,1,6
+18,Tourists stranded at Rohtang pass due to sudden weather change,2026-04-21T21:10:43Z,twitter,en,usr_118,410,false,Manali,9,35
+19,"Electric wires fallen on the road in Indiranagar, dangerous situation",2026-04-21T21:10:45Z,twitter,en,usr_119,500,true,Bangalore,15,55
+20,ಸರ್ಕಾರಿ ಸಹಾಯ ಇನ್ನೂ ಬಂದಿಲ್ಲ,2026-04-21T21:10:48Z,twitter,kn,usr_120,275,false,Hubli,6,22
+21,"Severe flooding near the river bank at Digha, people evacuating",2026-04-21T21:11:01Z,twitter,en,usr_121,1450,true,Patna,55,210
+22,"वाराणसी में अस्सी घाट के पास पुल टूट गया है, यातायात बंद है",2026-04-21T21:11:03Z,twitter,hi,usr_122,320,false,Varanasi,12,40
+23,No drinking water supply in Ameerpet since yesterday,2026-04-21T21:11:05Z,reddit,en,usr_123,78,false,Hyderabad,3,14
+24,Heavy rain causing traffic congestion near Marathahalli bridge,2026-04-21T21:11:07Z,twitter,en,usr_124,210,false,Bangalore,9,31
 25,"ಬೆಂಗಳೂರಿನಲ್ಲಿ ಮಳೆ ಜಾಸ್ತಿ, ರಸ್ತೆಗಳು ಮುಳುಗಿವೆ",2026-04-21T21:11:09Z,twitter,kn,usr_125,500,false,Bangalore,18,60
-26,"Fire accident reported in apartment complex",2026-04-21T21:11:12Z,twitter,en,usr_126,980,true,Mumbai,40,160
-27,"Hospital emergency ward is full, no space left",2026-04-21T21:11:14Z,twitter,en,usr_127,870,true,Chennai,33,120
-28,"Garbage piling up, causing foul smell",2026-04-21T21:11:16Z,reddit,en,usr_128,45,false,Kolkata,1,6
+26,Fire accident reported in an apartment complex in Goregaon,2026-04-21T21:11:12Z,twitter,en,usr_126,980,true,Mumbai,40,160
+27,"Hospital emergency ward in Egmore is full, no space left",2026-04-21T21:11:14Z,twitter,en,usr_127,870,true,Chennai,33,120
+28,"Garbage piling up in Howrah, causing foul smell",2026-04-21T21:11:16Z,reddit,en,usr_128,45,false,Kolkata,1,6
 29,"कोई मदद नहीं मिल रही है, स्थिति खराब है",2026-04-21T21:11:18Z,twitter,hi,usr_129,410,false,Delhi,14,48
-30,"Road blocked due to fallen trees",2026-04-21T21:11:20Z,twitter,en,usr_130,260,false,Pune,7,25
-31,"Tourist stuck due to landslide in hill station",2026-04-21T21:11:23Z,twitter,en,usr_131,630,false,Manali,15,52
-32,"Water logging everywhere after overnight rain",2026-04-21T21:11:25Z,twitter,en,usr_132,300,false,Mumbai,10,35
-33,"ನೀರಿನ ಸಮಸ್ಯೆ ತೀವ್ರವಾಗಿದೆ",2026-04-21T21:11:27Z,twitter,kn,usr_133,190,false,Mysore,5,18
-34,"Electricity gone for 10 hours, no response",2026-04-21T21:11:30Z,reddit,en,usr_134,60,false,Hyderabad,2,9
-35,"Massive fire in warehouse, smoke everywhere",2026-04-21T21:11:33Z,twitter,en,usr_135,1500,true,Delhi,60,240
-36,"पानी घरों में घुस गया है, लोग परेशान हैं",2026-04-21T21:11:35Z,twitter,hi,usr_136,380,false,Patna,16,58
-37,"Road accident causing long traffic jam",2026-04-21T21:11:37Z,twitter,en,usr_137,220,false,Chandigarh,8,27
-38,"No sanitation workers in our area for weeks",2026-04-21T21:11:40Z,reddit,en,usr_138,50,false,Jaipur,1,5
+30,"Road blocked due to fallen trees on FC Road, Shivajinagar",2026-04-21T21:11:20Z,twitter,en,usr_130,260,false,Pune,7,25
+31,Tourist stuck due to landslide in hill station,2026-04-21T21:11:23Z,twitter,en,usr_131,630,false,Manali,15,52
+32,Water logging everywhere in Dadar after overnight rain,2026-04-21T21:11:25Z,twitter,en,usr_132,300,false,Mumbai,10,35
+33,ಮೈಸೂರಿನ ಕುವೆಂಪುನಗರದಲ್ಲಿ ನೀರಿನ ಸಮಸ್ಯೆ ತೀವ್ರವಾಗಿದೆ,2026-04-21T21:11:27Z,twitter,kn,usr_133,190,false,Mysore,5,18
+34,"Electricity gone in Gachibowli for 10 hours, no response",2026-04-21T21:11:30Z,reddit,en,usr_134,60,false,Hyderabad,2,9
+35,"Massive fire in a warehouse in Narela, smoke everywhere",2026-04-21T21:11:33Z,twitter,en,usr_135,1500,true,Delhi,60,240
+36,"पटना के राजेंद्र नगर में पानी घरों में घुस गया है, लोग परेशान हैं",2026-04-21T21:11:35Z,twitter,hi,usr_136,380,false,Patna,16,58
+37,Road accident near Mohali bus stand causing long traffic jam,2026-04-21T21:11:37Z,twitter,en,usr_137,220,false,Chandigarh,8,27
+38,No sanitation workers in our area for weeks,2026-04-21T21:11:40Z,reddit,en,usr_138,50,false,Jaipur,1,5
 39,"Tourism site overcrowded, unsafe conditions",2026-04-21T21:11:42Z,twitter,en,usr_139,410,false,Goa,11,36
-40,"ಬೆಂಕಿ ಅವಘಡದಿಂದ ಜನರು ಹೊರಗೆ ಓಡುತ್ತಿದ್ದಾರೆ",2026-04-21T21:11:45Z,twitter,kn,usr_140,720,true,Bangalore,22,85
-41,"Bridge collapse reported, rescue teams needed",2026-04-21T21:11:48Z,twitter,en,usr_141,1100,true,Assam,48,190
-42,"No buses running due to heavy rain",2026-04-21T21:11:50Z,twitter,en,usr_142,180,false,Kochi,6,20
+40,ಬೆಂಕಿ ಅವಘಡದಿಂದ ಜನರು ಹೊರಗೆ ಓಡುತ್ತಿದ್ದಾರೆ,2026-04-21T21:11:45Z,twitter,kn,usr_140,720,true,Bangalore,22,85
+41,"Bridge collapse reported near Guwahati, rescue teams needed",2026-04-21T21:11:48Z,twitter,en,usr_141,1100,true,Assam,48,190
+42,No buses running in Kochi due to heavy rain,2026-04-21T21:11:50Z,twitter,en,usr_142,180,false,Kochi,6,20
 43,"Flood water rising rapidly, urgent help needed",2026-04-21T21:11:52Z,twitter,en,usr_143,950,true,Patna,37,140
-44,"लोगों को सुरक्षित स्थान पर भेजा जा रहा है",2026-04-21T21:11:55Z,twitter,hi,usr_144,600,true,Delhi,20,70
-45,"Power fluctuation damaging appliances",2026-04-21T21:11:58Z,reddit,en,usr_145,75,false,Mumbai,2,10
-46,"Garbage burning causing pollution issues",2026-04-21T21:12:01Z,twitter,en,usr_146,210,false,Kolkata,7,24
-47,"Tourist buses stuck due to road closure",2026-04-21T21:12:04Z,twitter,en,usr_147,390,false,Manali,12,40
-48,"Water supply pipeline broken",2026-04-21T21:12:06Z,twitter,en,usr_148,170,false,Hyderabad,5,18
-49,"ನಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ವಿದ್ಯುತ್ ಇಲ್ಲ",2026-04-21T21:12:09Z,twitter,kn,usr_149,260,false,Hubli,6,22
-50,"Firefighters struggling to control blaze",2026-04-21T21:12:12Z,twitter,en,usr_150,1300,true,Mumbai,42,170
-51,"Heavy winds causing damage to buildings",2026-04-21T21:12:15Z,twitter,en,usr_151,480,false,Chennai,14,50
-52,"कोई अधिकारी जवाब नहीं दे रहा है",2026-04-21T21:12:18Z,twitter,hi,usr_152,300,false,Delhi,10,33
-53,"Hospital lacks oxygen supply",2026-04-21T21:12:21Z,twitter,en,usr_153,1050,true,Delhi,36,130
-54,"Tourists complaining about poor facilities",2026-04-21T21:12:24Z,reddit,en,usr_154,55,false,Goa,2,8
-55,"Road submerged completely",2026-04-21T21:12:27Z,twitter,en,usr_155,220,false,Bangalore,9,29
-56,"ಬೆಂಗಳೂರಿನಲ್ಲಿ ಟ್ರಾಫಿಕ್ ಜಾಮ್ ಭಾರೀ ಮಟ್ಟದಲ್ಲಿ ಇದೆ",2026-04-21T21:12:30Z,twitter,kn,usr_156,350,false,Bangalore,11,38
-57,"Emergency services delayed response",2026-04-21T21:12:33Z,twitter,en,usr_157,780,true,Pune,25,95
-58,"Flood relief camps being set up",2026-04-21T21:12:36Z,twitter,en,usr_158,920,true,Assam,30,110
-59,"Residents protesting due to water shortage",2026-04-21T21:12:39Z,reddit,en,usr_159,65,false,Chennai,3,12
-60,"Accident victims waiting for ambulance",2026-04-21T21:12:42Z,twitter,en,usr_160,890,true,Mumbai,28,100
+44,लोगों को सुरक्षित स्थान पर भेजा जा रहा है,2026-04-21T21:11:55Z,twitter,hi,usr_144,600,true,Delhi,20,70
+45,Power fluctuation damaging appliances,2026-04-21T21:11:58Z,reddit,en,usr_145,75,false,Mumbai,2,10
+46,Garbage burning causing pollution issues,2026-04-21T21:12:01Z,twitter,en,usr_146,210,false,Kolkata,7,24
+47,Tourist buses stuck near Solang due to road closure,2026-04-21T21:12:04Z,twitter,en,usr_147,390,false,Manali,12,40
+48,Water supply pipeline broken in Secunderabad,2026-04-21T21:12:06Z,twitter,en,usr_148,170,false,Hyderabad,5,18
+49,ನಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ವಿದ್ಯುತ್ ಇಲ್ಲ,2026-04-21T21:12:09Z,twitter,kn,usr_149,260,false,Hubli,6,22
+50,Firefighters struggling to control the blaze in Goregaon,2026-04-21T21:12:12Z,twitter,en,usr_150,1300,true,Mumbai,42,170
+51,Heavy winds causing damage to buildings in Velachery,2026-04-21T21:12:15Z,twitter,en,usr_151,480,false,Chennai,14,50
+52,कोई अधिकारी जवाब नहीं दे रहा है,2026-04-21T21:12:18Z,twitter,hi,usr_152,300,false,Delhi,10,33
+53,Hospital in Rohini lacks oxygen supply,2026-04-21T21:12:21Z,twitter,en,usr_153,1050,true,Delhi,36,130
+54,Tourists complaining about poor facilities,2026-04-21T21:12:24Z,reddit,en,usr_154,55,false,Goa,2,8
+55,Road submerged completely near Hebbal flyover,2026-04-21T21:12:27Z,twitter,en,usr_155,220,false,Bangalore,9,29
+56,ಬೆಂಗಳೂರಿನಲ್ಲಿ ಟ್ರಾಫಿಕ್ ಜಾಮ್ ಭಾರೀ ಮಟ್ಟದಲ್ಲಿ ಇದೆ,2026-04-21T21:12:30Z,twitter,kn,usr_156,350,false,Bangalore,11,38
+57,Emergency services delayed response,2026-04-21T21:12:33Z,twitter,en,usr_157,780,true,Pune,25,95
+58,Flood relief camps being set up in Dhemaji,2026-04-21T21:12:36Z,twitter,en,usr_158,920,true,Assam,30,110
+59,Residents protesting in Tambaram due to water shortage,2026-04-21T21:12:39Z,reddit,en,usr_159,65,false,Chennai,3,12
+60,Accident victims waiting for ambulance near Andheri flyover,2026-04-21T21:12:42Z,twitter,en,usr_160,890,true,Mumbai,28,100
+61,"Bellandur lake overflowing, water entering apartments on Outer Ring Road, families on ground floor need to move up",2026-04-21T21:12:45Z,twitter,en,usr_201,640,false,Bangalore,18,70
+62,"ಬೆಳ್ಳಂದೂರು ಕೆರೆ ಉಕ್ಕಿ ಹರಿಯುತ್ತಿದೆ, ಮನೆಗಳಿಗೆ ನೀರು ನುಗ್ಗಿದೆ, ಸಹಾಯ ಬೇಕು",2026-04-21T21:12:48Z,twitter,kn,usr_202,410,false,Bangalore,9,31
+63,"Bellandur nalli neeru tumba jaasti aagide, mane olage neeru bandide, sahaya beku",2026-04-21T21:12:51Z,twitter,kn,usr_203,150,false,Bangalore,4,12
+64,"बेल्लंदूर में पानी घरों में घुस गया है, बुजुर्ग लोग फंसे हुए हैं, नाव भेजो",2026-04-21T21:12:54Z,twitter,hi,usr_204,520,false,Bangalore,12,40
+65,"Water level near Bellandur ORR is about 3 feet now, two cars stuck, BBMP please send pumps",2026-04-21T21:12:57Z,twitter,en,usr_205,2100,true,Bangalore,55,210
+66,"Bellandur mein paani ghar ke andar aa gaya hai, bacche aur buzurg phanse hain, madad bhejo",2026-04-21T21:13:00Z,twitter,hi,usr_206,230,false,Bangalore,6,19
+67,"Cyclone winds uprooted trees in Velachery, power lines down, roads blocked since 2 am",2026-04-21T21:13:03Z,twitter,en,usr_207,880,true,Chennai,30,120
+68,"வேளச்சேரியில் மரங்கள் விழுந்துள்ளன, மின்சாரம் இல்லை, சாலைகள் அடைபட்டுள்ளன",2026-04-21T21:13:06Z,twitter,ta,usr_208,390,false,Chennai,11,37
+69,"Velachery la current illa, maram vizhundhu road block aagiduchu, help venum",2026-04-21T21:13:09Z,twitter,ta,usr_209,120,false,Chennai,3,9
+70,"Tambaram subway flooded after cyclone rain, buses stopped, people walking through waist deep water",2026-04-21T21:13:12Z,twitter,en,usr_210,760,false,Chennai,21,66
+71,"Fire broke out in the ICU wing of a hospital in Rohini, patients being shifted, fire engines on the spot",2026-04-21T21:13:15Z,twitter,en,usr_211,3100,true,Delhi,120,540
+72,"रोहिणी के अस्पताल में आग लगी है, मरीजों को बाहर निकाला जा रहा है, एम्बुलेंस चाहिए",2026-04-21T21:13:18Z,twitter,hi,usr_212,610,false,Delhi,25,90
+73,"Rohini hospital mein aag lagi hai, ICU ke patients ko shift kar rahe hain, ambulance chahiye",2026-04-21T21:13:21Z,twitter,hi,usr_213,280,false,Delhi,7,24
+74,"Smoke coming out of the hospital building in Rohini sector 7, oxygen cylinders being moved out",2026-04-21T21:13:24Z,twitter,en,usr_214,950,false,Delhi,33,101
+75,"హైదరాబాద్ లో మూడు రోజులుగా నీటి సరఫరా లేదు, ట్యాంకర్లు కూడా రావడం లేదు",2026-04-21T21:13:27Z,twitter,te,usr_215,340,false,Hyderabad,8,29
+76,"Kukatpally lo neellu raavatledu three days nundi, tanker kuda raledu, please help",2026-04-21T21:13:30Z,twitter,te,usr_216,160,false,Hyderabad,4,13
+77,"No water supply in Kukatpally for three days, residents buying water cans at double price",2026-04-21T21:13:33Z,twitter,en,usr_217,700,false,Hyderabad,16,58
+78,"FORWARD TO ALL!!! Hebbal lake bund has broken, whole north Bangalore will flood tonight, 100% true, media is hiding it",2026-04-21T21:13:36Z,twitter,en,usr_301,12,false,,40,15
+79,"Forward to all!! Hebbal lake bund has broken, whole north Bangalore will flood tonight, 100% true, media is hiding it",2026-04-21T21:13:56Z,twitter,en,usr_302,8,false,,35,9
+80,"FORWARD TO ALL. Hebbal lake bund has broken. Whole north Bangalore will flood tonight. 100% true, media is hiding it",2026-04-21T21:14:16Z,twitter,en,usr_303,25,false,,51,20
+81,forward to all!!! hebbal lake bund has broken whole north bangalore will flood tonight 100% true media is hiding it!!,2026-04-21T21:14:36Z,twitter,en,usr_304,3,false,,28,4
+82,"FORWARD TO ALL!!! Hebbal lake bund has broken, whole north Bangalore will flood tonight, 100% true, media is hiding it 🙏🙏",2026-04-21T21:14:56Z,twitter,en,usr_305,17,false,,44,13
+83,"RT FORWARD TO ALL!!! Hebbal lake bund has broken, whole north Bangalore will flood tonight, 100% true, media is hiding it",2026-04-21T21:15:16Z,twitter,en,usr_306,5,false,,0,0
+84,"Share this to everyone!!! Hebbal lake bund has broken, whole north Bangalore will flood tonight, 100% true",2026-04-21T21:15:36Z,twitter,en,usr_307,9,false,,22,6
+85,"Forward this to everyone: KRS dam gates opened fully, Mysore city will be under water in 2 hours, evacuate now",2026-04-21T21:15:56Z,twitter,en,usr_308,30,false,,60,22
+86,"सबको भेजो: KRS बांध के सारे गेट खोल दिए गए हैं, 2 घंटे में मैसूर डूब जाएगा, तुरंत निकलो",2026-04-21T21:16:36Z,twitter,hi,usr_309,14,false,,38,11
+87,"ಎಲ್ಲರಿಗೂ ಕಳುಹಿಸಿ: KRS ಅಣೆಕಟ್ಟಿನ ಎಲ್ಲಾ ಗೇಟ್ ತೆರೆದಿದೆ, 2 ಗಂಟೆಯಲ್ಲಿ ಮೈಸೂರು ಮುಳುಗುತ್ತದೆ, ತಕ್ಷಣ ಹೊರಡಿ",2026-04-21T21:17:16Z,twitter,kn,usr_310,21,false,,45,16
+88,"Sabko bhejo: KRS dam ke saare gate khol diye, 2 ghante mein Mysore doob jayega, turant niklo",2026-04-21T21:17:56Z,twitter,hi,usr_311,6,false,,19,5
+89,"Forward this to everyone: KRS dam gates opened fully, Mysuru will be under water in 2 hours, evacuate immediately!!",2026-04-21T21:18:36Z,twitter,en,usr_312,11,false,,33,8
+90,"heard that the water supply in Whitefield is poisoned after the flood, don't drink tap water",2026-04-21T21:19:16Z,twitter,en,usr_313,40,false,Bangalore,15,7
+91,"people are saying Whitefield tap water has poison in it, someone's relative got sick, not sure",2026-04-21T21:20:46Z,twitter,en,usr_314,22,false,Bangalore,9,3
+92,"apparently the government is hiding that Whitefield water is contaminated with chemicals, my friend told me",2026-04-21T21:22:16Z,twitter,en,usr_315,18,false,Bangalore,12,5
+93,"सुना है व्हाइटफील्ड के पानी में ज़हर मिला है, कोई मत पीना",2026-04-21T21:23:46Z,twitter,hi,usr_316,31,false,Bangalore,8,4
+94,"Bellandur lake overflowing, water entering apartments on Outer Ring Road, families on ground floor need to move up",2026-04-21T21:25:16Z,twitter,en,usr_317,90,false,Bangalore,0,0
+95,"RT Bellandur lake overflowing, water entering apartments on Outer Ring Road, families on ground floor need to move up",2026-04-21T21:25:19Z,twitter,en,usr_318,45,false,Bangalore,0,0
+96,"WIN a FREE iPhone 15!!! Just click the link in bio and share with 10 friends, offer ends tonight",2026-04-21T21:25:22Z,twitter,en,usr_401,2,false,,0,1
+97,"Earn Rs 5000 daily from home, no investment, WhatsApp me now for details",2026-04-21T21:25:25Z,twitter,en,usr_402,1,false,,0,0
+98,"Crypto signal group 🚀 100x guaranteed profit, join fast, limited seats",2026-04-21T21:25:28Z,twitter,en,usr_403,4,false,,0,2
+99,"घर बैठे कमाएं 10000 रुपये रोज़, अभी लिंक पर क्लिक करें",2026-04-21T21:25:31Z,twitter,hi,usr_404,3,false,,0,0
+100,"Flat 70% off on all shoes this weekend only, visit our store at MG Road",2026-04-21T21:25:34Z,twitter,en,usr_405,150,false,Bangalore,1,3
+101,"Landslide on the Manali highway near Solang, vehicles stuck on both sides, rescue team needed",2026-04-21T21:25:37Z,twitter,en,usr_218,1200,true,Manali,48,190
+102,"Manali ke paas landslide hua hai, highway band hai, gaadiyan phansi hain",2026-04-21T21:25:40Z,twitter,hi,usr_219,260,false,Manali,7,21
+103,"Tourists stranded at Solang valley after landslide, hotels running out of food",2026-04-21T21:25:43Z,twitter,en,usr_220,540,false,Manali,19,64
+104,"Building collapsed in Bhiwandi after heavy rain, people trapped under debris, NDRF needed urgently",2026-04-21T21:25:46Z,twitter,en,usr_221,2600,true,Mumbai,140,600
+105,"भिवंडी में इमारत गिर गई, मलबे में लोग दबे हैं, तुरंत मदद चाहिए",2026-04-21T21:25:49Z,twitter,hi,usr_222,480,false,Mumbai,22,75
+106,"Bhiwandi building collapse, we can hear people calling from under the debris, send JCB and ambulance",2026-04-21T21:25:52Z,twitter,en,usr_223,830,false,Mumbai,37,140
+107,"Garbage piling up near Majestic bus stand for a week, smell is unbearable",2026-04-21T21:25:55Z,twitter,en,usr_224,210,false,Bangalore,3,12
+108,"Streetlights not working on Hosur road for 5 days, accidents happening at night",2026-04-21T21:25:58Z,twitter,en,usr_225,330,false,Bangalore,6,20
+109,"Mob gathering near the market in Hubli after a clash, police needed immediately",2026-04-21T21:26:01Z,twitter,en,usr_226,700,false,Hubli,26,88
+110,"ಹುಬ್ಬಳ್ಳಿ ಮಾರುಕಟ್ಟೆ ಬಳಿ ಗಲಾಟೆ ನಡೆಯುತ್ತಿದೆ, ಪೊಲೀಸ್ ಬೇಕು",2026-04-21T21:26:04Z,twitter,kn,usr_227,300,false,Hubli,10,33
+111,"Forward to all: 7.5 earthquake will hit Bangalore tonight at 2 am, NDRF has warned, sleep outside, share maximum",2026-04-21T21:26:19Z,twitter,en,usr_319,14,false,,70,25
+112,"FORWARD TO ALL!! 7.5 earthquake will hit Bangalore tonight at 2am, NDRF warned, sleep outside, share maximum!!",2026-04-21T21:26:34Z,twitter,en,usr_320,6,false,,52,18
+113,"Share maximum: NDRF warned 7.5 earthquake hitting Bangalore tonight 2 am, everyone sleep outside, 100% true",2026-04-21T21:26:49Z,twitter,en,usr_321,9,false,,47,12
+114,"सबको भेजो: आज रात 2 बजे बेंगलुरु में 7.5 का भूकंप आएगा, NDRF ने चेतावनी दी है, बाहर सो जाओ",2026-04-21T21:27:04Z,twitter,hi,usr_322,19,false,,39,10
+115,"Forward to all!!! 7.5 earthquake will hit Bangalore tonight at 2 am, NDRF has warned, sleep outside, share maximum 🙏",2026-04-21T21:27:19Z,twitter,en,usr_323,4,false,,33,7
+116,"heard that a dam burst near Hosakote and flood water is coming to Whitefield, people are saying evacuate",2026-04-21T21:29:19Z,twitter,en,usr_324,35,false,Bangalore,14,6
+117,"people saying flood water from Hosakote dam will reach Whitefield tonight, not sure but be careful",2026-04-21T21:31:19Z,twitter,en,usr_325,27,false,Bangalore,10,4
+118,"someone told me Hosakote dam has cracked and Whitefield will flood by morning, can anyone confirm?",2026-04-21T21:33:19Z,twitter,en,usr_326,48,false,Bangalore,8,5
+119,"Major accident at Bommanahalli junction on Hosur road, bus hit two bikes, 3 people injured, need ambulance fast",2026-04-21T21:33:23Z,twitter,en,usr_228,940,false,Bangalore,31,120
+120,"ಬೊಮ್ಮನಹಳ್ಳಿ ಬಳಿ ಹೊಸೂರು ರಸ್ತೆಯಲ್ಲಿ ಬಸ್ ಅಪಘಾತ, ಮೂವರಿಗೆ ಗಾಯ, ಆಂಬುಲೆನ್ಸ್ ಬೇಕು",2026-04-21T21:33:27Z,twitter,kn,usr_229,380,false,Bangalore,12,41
+121,"Bommanahalli hatra bus accident aagide, mooru jana ge gaaya aagide, ambulance beku",2026-04-21T21:33:31Z,twitter,kn,usr_230,140,false,Bangalore,4,15
+122,"Traffic police at the Bommanahalli accident spot, one lane closed on Hosur road, avoid the route",2026-04-21T21:33:35Z,twitter,en,usr_231,2200,true,Bangalore,60,230
+123,"Truck overturned on the Western Express Highway near Andheri, driver trapped in the cabin, need a crane",2026-04-21T21:33:39Z,twitter,en,usr_232,610,false,Mumbai,22,80
+124,"Rain finally stopped in Koramangala and the roads are already cleared, great job BBMP!",2026-04-21T21:33:43Z,twitter,en,usr_233,520,false,Bangalore,15,90
+125,"Power is back in Velachery after two days, so relieved and happy!",2026-04-21T21:33:47Z,twitter,en,usr_234,310,false,Chennai,6,44
+126,"Thank you NDRF for rescuing everyone from the Bhiwandi building, you are real heroes",2026-04-21T21:33:51Z,twitter,en,usr_235,1500,true,Mumbai,80,400
+127,"बाढ़ के बाद पटना में हालात सामान्य हो रहे हैं, सभी बचाव दलों को धन्यवाद",2026-04-21T21:33:55Z,twitter,hi,usr_236,450,false,Patna,14,60
+128,"Amazing volunteers at the Bellandur relief camp! They are running short of blankets and drinking water though, please donate",2026-04-21T21:33:59Z,twitter,en,usr_237,870,false,Bangalore,40,150
+129,"So proud of the doctors at Rohini hospital working nonstop, but they urgently need more oxygen cylinders",2026-04-21T21:34:03Z,twitter,en,usr_238,1100,true,Delhi,52,210
+130,"Great to see the community kitchen in Kukatpally feeding 500 families, they need more rice and gas cylinders",2026-04-21T21:34:07Z,twitter,en,usr_239,400,false,Hyderabad,18,70
+131,"ಜಯನಗರದ ಸ್ವಯಂಸೇವಕರು ಅದ್ಭುತ ಕೆಲಸ ಮಾಡುತ್ತಿದ್ದಾರೆ, ಆದರೆ ಅವರಿಗೆ ಔಷಧಿ ಮತ್ತು ಆಹಾರ ಬೇಕು",2026-04-21T21:34:11Z,twitter,kn,usr_240,260,false,Bangalore,8,30
+132,"Dwarka mein volunteers bahut accha kaam kar rahe hain, par khana aur dawai ki zaroorat hai",2026-04-21T21:34:15Z,twitter,hi,usr_241,190,false,Delhi,5,22
+133,"So sad to see the flood pictures from Dhemaji, praying for everyone there",2026-04-21T21:34:19Z,twitter,en,usr_242,330,false,Assam,9,55
+134,"Heartbreaking news about the Rohini hospital fire, can't stop thinking about the patients",2026-04-21T21:34:23Z,twitter,en,usr_243,720,false,Delhi,20,95
+135,"IMD forecasts heavy rain in coastal Karnataka for the next 48 hours, fishermen advised not to go to sea",2026-04-21T21:34:27Z,twitter,en,usr_244,5200,true,Mangalore,210,800
+136,"Traffic diverted near Hebbal flyover due to waterlogging, please use the service road",2026-04-21T21:34:31Z,twitter,en,usr_245,3400,true,Bangalore,150,520

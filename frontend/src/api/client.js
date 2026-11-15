@@ -75,3 +75,9 @@ export function updateTicket(id, status) {
 export function getAnalyticsSummary() {
   return request("/analytics/summary");
 }
+
+export function getFilteredPosts(reason, limit = 8) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (reason) params.set("reason", reason);
+  return request(`/analytics/filtered?${params}`);
+}

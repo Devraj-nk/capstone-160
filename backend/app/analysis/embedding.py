@@ -16,7 +16,9 @@ def _load_embedding_model() -> Any:
     if _embedding_model is None:
         from sentence_transformers import SentenceTransformer
 
-        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_PATH)
+        from .model_store import model_source
+
+        _embedding_model = SentenceTransformer(model_source(EMBEDDING_MODEL_PATH))
     return _embedding_model
 
 
@@ -24,5 +26,5 @@ def generate_embedding(text: str) -> list[float]:
     """Generate one normalized IndicSBERT embedding for a post."""
     if not text.strip():
         raise ValueError("Cannot embed empty text")
-    embedding = _load_embedding_model().encode(text, normalize_embeddings=True)
+    embedding = _load_embedding_model().encode(text, normalize_embeddings=True, show_progress_bar=False)
     return embedding.tolist()

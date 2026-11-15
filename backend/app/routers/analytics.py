@@ -3,9 +3,10 @@ from __future__ import annotations
 import time
 from datetime import date
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from ..analytics import metrics, service
+from ..db import DROPPED_TWEETS, get_collection
 
 router = APIRouter(tags=["analytics"])
 
@@ -34,6 +35,21 @@ async def trends() -> dict:
 async def heatmaps() -> dict:
     """Department x hour of day and need x language (last 7 days of posts)."""
     return await service.heatmaps()
+
+
+@router.get("/analytics/filtered")
+async def filtered_posts(
+    reason: str | None = Query(None, pattern="^(not_disaster|repost|invalid)$"),
+    limit: int = Query(20, ge=1, le=200),
+) -> dict:
+    """Recent posts the pipeline removed before analysis (not a disaster,
+    repost, invalid), newest first, with counts per reason. Text is already
+    privacy-masked; records expire after DROPPED_RETENTION_DAYS."""
+    collection = get_collection(DROPPED_TWEETS)
+    query = {"reason": reason} if reason else {}
+    cursor = collection.find(query, {"_id": 0, "expires_at": 0}).sort("dropped_at", -1).limit(limit)
+    counts = {doc["_id"]: doc["n"] async for doc in collection.aggregate([{"$group": {"_id": "$reason", "n": {"$sum": 1}}}])}
+    return {"counts": counts, "posts": await cursor.to_list(length=limit)}
 
 
 @router.get("/reports/daily")

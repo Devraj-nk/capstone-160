@@ -7,3 +7,5 @@ __pycache__/
 my_work.txt
 Devraj's
 pptcontent.txt
+# Downloaded ML models (~5.5 GB) - fetch with: python backend/tools/download_models.py
+backend/models/

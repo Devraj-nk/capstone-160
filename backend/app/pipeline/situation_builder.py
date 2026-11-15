@@ -59,6 +59,7 @@ def build_situation(cluster: Cluster, *, now: float | None = None) -> dict[str, 
 
     step10 = summarise_cluster(scored, records, tweet_feats, scored["dup_groups"])
     metadata_by_id = {str(r["tweet_id"]): r.get("metadata") or {} for r in records}
+    record_by_id = {str(r["tweet_id"]): r for r in records}
     evidence = [
         EvidenceItem(
             post_id=str(item["tweet_id"]),
@@ -68,6 +69,8 @@ def build_situation(cluster: Cluster, *, now: float | None = None) -> dict[str, 
             lang=item["lang"],
             score=item["score"],
             why=item["why"],
+            sentiment=record_by_id.get(str(item["tweet_id"]), {}).get("sentiment_label"),
+            negativity=_round(record_by_id.get(str(item["tweet_id"]), {}).get("sentiment_negativity")),
             metadata=mask_metadata(metadata_by_id.get(str(item["tweet_id"]), {})),
         )
         for item in step10["evidence"]

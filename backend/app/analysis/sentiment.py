@@ -14,8 +14,10 @@ def _load_model():
     if _model is None:
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-        _tokenizer = AutoTokenizer.from_pretrained(SENTIMENT_MODEL_PATH)
-        _model = AutoModelForSequenceClassification.from_pretrained(SENTIMENT_MODEL_PATH)
+        from .model_store import model_source
+
+        _tokenizer = AutoTokenizer.from_pretrained(model_source(SENTIMENT_MODEL_PATH))
+        _model = AutoModelForSequenceClassification.from_pretrained(model_source(SENTIMENT_MODEL_PATH))
         _model.eval()
     return _tokenizer, _model
 

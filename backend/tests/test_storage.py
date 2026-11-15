@@ -115,19 +115,31 @@ def test_verdict_snapshot_is_frozen_when_the_situation_is_rescored_later():
     assert verdict["tweet_ids"] == ["t0", "t1", "t2"]
 
 
-def test_mark_fake_sets_status_verdict_and_cancels_tickets():
+def test_mark_fake_keeps_the_situation_routed_but_flags_its_tickets():
+    # a reviewer's "fake" is a signal for the department, not a veto
     situation_id = upsert()
     decide(situation_id, "approve")
     body = decide(situation_id, "fake")
 
     assert body["status"] == "fake"
-    assert body["routed_to"] is None
+    assert body["routed_to"] == body["department"]
     verdicts = asyncio.run(find_documents("verdicts", {"situation_id": situation_id}))
     assert [v["verdict"] for v in verdicts] == ["true", "fake"]
     ticket = client.get("/tickets").json()[0]
-    assert ticket["status"] == "cancelled"
-    assert [e["status"] for e in ticket["history"]] == ["routed", "cancelled"]
+    assert ticket["status"] == "routed"
+    assert ticket["reviewer_flag"] == "fake" and ticket["verified"] is False
     assert client.get("/analytics/summary").json()["fake"] == 1
+
+    decide(situation_id, "approve")  # a later "Real" clears the flag
+    ticket = client.get("/tickets").json()[0]
+    assert ticket["reviewer_flag"] is None and ticket["verified"] is True
+
+
+def test_fake_on_an_undecided_situation_still_opens_flagged_tickets():
+    situation_id = upsert()
+    decide(situation_id, "fake")
+    tickets = client.get("/tickets").json()
+    assert tickets and all(t["reviewer_flag"] == "fake" and not t["verified"] for t in tickets)
 
 
 # --- routing tickets ---

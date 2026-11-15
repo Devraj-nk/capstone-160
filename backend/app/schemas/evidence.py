@@ -27,6 +27,8 @@ class EvidenceItem(BaseModel):
     lang: Optional[str] = None
     text_en: Optional[str] = None  # English translation for reviewers; None = not translated
     why: list[str] = Field(default_factory=list)
+    sentiment: Optional[str] = None  # this post's own label: negative / positive
+    negativity: Optional[float] = None  # P(negative) from the sentiment model
 
 
 class StoredEvidence(EvidenceItem):

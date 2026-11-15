@@ -25,8 +25,10 @@ def _load_model():
     if _model is None:
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-        _tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-        _model = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH)
+        from ..analysis.model_store import model_source
+
+        _tokenizer = AutoTokenizer.from_pretrained(model_source(MODEL_PATH))
+        _model = AutoModelForSequenceClassification.from_pretrained(model_source(MODEL_PATH))
         _model.eval()
     return _tokenizer, _model
 
@@ -69,7 +71,21 @@ def _predict_with_classifier(text: str) -> str:
     with torch.no_grad():
         logits = model(**enc).logits
     predicted_id = int(torch.argmax(logits, dim=1)[0])
-    return model.config.id2label[predicted_id]
+    return label_to_lang(model.config.id2label.get(predicted_id), predicted_id)
+
+
+# The published model's config only has generic names (LABEL_0..LABEL_4); its
+# lang2id.json (shipped with the model) gives the real order.
+ID2LANG = {0: "en", 1: "hi", 2: "kn", 3: "ta", 4: "te"}
+_LANG_CODES = set(ID2LANG.values())
+
+
+def label_to_lang(label: str | None, predicted_id: int) -> str:
+    """Language code for a classifier output: the config's label when it is
+    already a language code, otherwise the lang2id.json order."""
+    if label in _LANG_CODES:
+        return label
+    return ID2LANG.get(predicted_id, "unknown")
 
 
 def detect_language_final(text: str) -> dict:

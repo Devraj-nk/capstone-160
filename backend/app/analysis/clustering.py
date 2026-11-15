@@ -7,6 +7,8 @@ import uuid
 
 import numpy as np
 
+from ..scoring.lexicons import PLACE_NAMES
+from ..scoring.text_utils import CompiledLexicon, tokenize
 from .embedding import generate_embedding
 
 
@@ -23,6 +25,22 @@ def _parse_timestamp(value: str | float | int) -> datetime:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+# Place guard: a post that names a place joins a cluster only if the cluster
+# names the same place (or names none). Latin spellings only; native-script
+# posts and posts without a place are matched on meaning alone.
+_PLACE_LEX = CompiledLexicon({"all_latin": PLACE_NAMES["all_latin"]})
+_PLACE_ALIASES = {"bengaluru": "bangalore", "mysuru": "mysore", "mangaluru": "mangalore", "vizag": "visakhapatnam"}
+
+
+def place_names(text: str) -> set[str]:
+    """Place names a post mentions, one spelling per place (Mysuru = Mysore)."""
+    return {
+        _PLACE_ALIASES.get(tok, tok)
+        for tok in dict.fromkeys(tokenize(text or ""))
+        if tok.isascii() and _PLACE_LEX.match([tok])
+    }
+
+
 def _needs(record: dict[str, Any]) -> dict[str, float]:
     values = record.get("needs", {})
     return {str(key): float(value) for key, value in values.items()}
@@ -37,6 +55,7 @@ class Cluster:
     created_at: str | float | int
     last_updated_at: str | float | int
     dept_relevance: dict[str, float] = field(default_factory=dict)
+    _places: set[str] | None = field(default=None, repr=False, compare=False)  # cache, not stored
 
     @classmethod
     def from_record(cls, record: dict[str, Any], embedding: np.ndarray) -> Cluster:
@@ -58,6 +77,14 @@ class Cluster:
             self.last_updated_at = record["created_at"]
         for department, score in _needs(record).items():
             self.dept_relevance[department] = max(self.dept_relevance.get(department, 0.0), score)
+        if self._places is not None:
+            self._places |= place_names(record.get("text", ""))
+
+    @property
+    def places(self) -> set[str]:
+        if self._places is None:
+            self._places = set().union(*(place_names(m.get("text", "")) for m in self.members))
+        return self._places
 
     @property
     def size(self) -> int:
@@ -106,6 +133,7 @@ class ClusterManager:
         best_cluster: Cluster | None = None
         best_similarity = -1.0
         record_time = _parse_timestamp(record["created_at"])
+        record_places = place_names(record["text"])
 
         for cluster in self.clusters:
             similarity = float(np.dot(vector, cluster.centroid))
@@ -114,6 +142,8 @@ class ClusterManager:
                 continue
             if not self._department_overlap(cluster, record):
                 continue
+            if record_places and cluster.places and not (record_places & cluster.places):
+                continue  # names a different place: a different event
             if similarity > best_similarity:
                 best_cluster = cluster
                 best_similarity = similarity

@@ -69,8 +69,11 @@ async def get_situation_evidence(situation_id: str) -> list[dict]:
 
 @router.post("/situations/{situation_id}/decision", response_model=Situation)
 async def decide_situation(situation_id: str, body: SituationDecision) -> Situation:
-    """Steps 12-13: approve routes the situation to every needed department
-    (one routing ticket each); reject / fake cancels open tickets. Every
+    """Steps 12-13: a reviewer's decision backs the system, it is not a veto.
+    approve routes the situation (one verified ticket per needed department);
+    fake routes it too, but the tickets are unverified and flagged "fake" so
+    the department knows a reviewer doubted it; reject (API only, not in the
+    console) cancels open tickets. Every
     decision is stored as a verdict with a frozen snapshot of the scores, which
     is what evaluation and retraining read even if the cluster changes later."""
     doc = await find_one_document(SITUATIONS, {"id": situation_id})
@@ -80,9 +83,10 @@ async def decide_situation(situation_id: str, body: SituationDecision) -> Situat
     now = time.time()
     status, verdict = DECISIONS[body.decision]
     update: dict = {"status": status, "decided_at": now, "review_note": body.note}
-    if body.decision == "approve":
-        await open_tickets(doc)
-        update.update(routed_to=doc.get("department"), routed_at=now)
+    if body.decision in ("approve", "fake"):
+        flagged = body.decision == "fake"
+        await open_tickets(doc, verified=not flagged, reviewer_flag="fake" if flagged else None)
+        update.update(routed_to=doc.get("department"), routed_at=doc.get("routed_at") or now)
     else:
         await cancel_tickets(situation_id)
         update.update(routed_to=None, routed_at=None)
@@ -121,8 +125,8 @@ async def analytics_summary() -> AnalyticsSummary:
     by_department: dict[str, int] = {}
     for doc in docs:
         dept = doc.get("department")
-        # live workload only: rejected / fake situations are not a department's concern
-        if dept and doc.get("status") in ("pending", "auto_routed", "confirmed"):
+        # live workload: everything still with a department (reviewer-flagged fakes are routed too)
+        if dept and doc.get("status") in ("pending", "auto_routed", "confirmed", "fake"):
             by_department[dept] = by_department.get(dept, 0) + 1
 
     dropped = {

@@ -187,7 +187,8 @@ def test_daily_report_contents():
         "confirmed_by_band": {"Critical": 0, "High": 1, "Medium": 0, "Low": 0},
         "auto_routed_unverified": 1, "pending": 1, "marked_fake": 1, "rejected": 0,
     }
-    assert [e["id"] for e in report["situations"]] == ["fire", "flood"]  # peak priority 0.9 > 0.8
+    # reviewer-flagged fakes are still routed, so they are listed too
+    assert [e["id"] for e in report["situations"]] == ["fire", "flood", "rumour"]
     flood = report["situations"][1]
     assert (flood["peak_priority"], flood["peak_band"]) == (0.8, "Critical")
     assert flood["detected_to_ack_min"] == 11.7  # 700 s after detection
@@ -263,8 +264,33 @@ def test_previous_day_report_is_generated_once():
     assert len(asyncio.run(find_documents("daily_reports", {}))) == 1
 
 
-def test_department_counts_leave_out_rejected_and_fake():
+def test_department_counts_leave_out_rejected_but_keep_reviewer_flagged_fakes():
     for sid, status in (("a", "pending"), ("b", "rejected"), ("c", "fake"), ("d", "confirmed")):
         asyncio.run(insert_document("situations", {"id": sid, "text": "", "status": status,
                                                    "department": "Healthcare", "created_at": time.time()}))
-    assert client.get("/analytics/summary").json()["by_department"] == {"Healthcare": 2}
+    assert client.get("/analytics/summary").json()["by_department"] == {"Healthcare": 3}
+
+
+def test_filtered_posts_lists_newest_first_with_counts(mock_database):
+    import asyncio
+
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    docs = [
+        {"id": "d1", "tweet_id": "1", "text": "win a free phone", "reason": "not_disaster",
+         "detail": {"lang": "en", "disaster_confidence": 0.01, "threshold": 0.5}, "dropped_at": 100.0},
+        {"id": "d2", "tweet_id": "2", "text": "flood near bellandur", "reason": "repost",
+         "detail": {"repost_count": 2}, "dropped_at": 200.0},
+        {"id": "d3", "tweet_id": "3", "text": "cricket tonight", "reason": "not_disaster",
+         "detail": {"lang": "en", "disaster_confidence": 0.02, "threshold": 0.5}, "dropped_at": 300.0},
+    ]
+    asyncio.run(mock_database["dropped_tweets"].insert_many([dict(d) for d in docs]))
+    with TestClient(app) as client:
+        all_posts = client.get("/analytics/filtered").json()
+        reposts = client.get("/analytics/filtered", params={"reason": "repost"}).json()
+    assert all_posts["counts"] == {"not_disaster": 2, "repost": 1}
+    assert [p["tweet_id"] for p in all_posts["posts"]] == ["3", "2", "1"]
+    assert [p["tweet_id"] for p in reposts["posts"]] == ["2"]
+    assert "_id" not in all_posts["posts"][0]

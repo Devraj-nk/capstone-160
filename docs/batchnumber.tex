@@ -1,0 +1,94 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[margin=0.53in]{geometry}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{multicol}
+\usepackage{ragged2e}
+\usepackage[none]{hyphenat}
+\usepackage{qrcode}
+
+\renewcommand{\baselinestretch}{1.1}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\begin{document}
+\centering
+\begin{tabular}{|l@{\hspace{1em}}|>{\raggedright\arraybackslash}p{12cm}|}
+
+\hline
+\multicolumn{2}{|p{18cm}|}{
+\centering \textbf{Title} %Add Title here
+\vspace{0.15cm}
+} \\
+\hline
+\multicolumn{2}{|p{16cm}|}{
+\textbf{Domain:} % Add domains here
+\vspace{0.1cm}
+} \\
+\hline
+\multicolumn{2}{|p{18cm}|}{
+\textbf{Abstract:}\newline
+\justifying
+% Add abstract here
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Curabitur pretium, dolor non lacinia gravida, est orci ullamcorper metus, non interdum metus velit sed diam. Aliquam erat volutpat. Fusce malesuada iaculis nunc, at commodo ipsum aliquet vitae. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut vitae felis sit amet est laoreet feugiat. Aenean vel magna at ex placerat finibus. Donec ac dolor sit amet turpis fringilla consectetur. Praesent euismod, mi in iaculis eleifend, elit justo fermentum elit, non vulputate ipsum turpis nec lacus. Phasellus sit amet libero mollis, hendrerit mi eu, iaculis erat. Suspendisse potenti. Nam non mi nec justo dapibus.
+} \\
+\hline
+\multicolumn{2}{|p{16cm}|}{
+\begin{minipage}[t]{\linewidth}
+\textbf{Architecture / Flow Diagram:}
+
+\vspace{6pt}
+\end{minipage}
+} \\
+\multicolumn{2}{|c|}{
+  \begin{minipage}{\linewidth}
+    \centering
+    \includegraphics[width=11cm]{batchnumber_1.png}
+    % If 2 images do this- (else remove the below 2lines)
+    \hspace{0.09\linewidth}
+    \includegraphics[width=11cm]{batchnumber_2.png}
+    \vspace{10pt}
+  \end{minipage}
+} \\
+
+\hline
+\begin{tabular}[t]{@{}l@{}}
+\textbf{Supervisor:} \\[0.8ex]
+Supervisor Name \\[-0.1em]
+\small Professor(Assistant/Associate)
+\end{tabular}
+&
+\begin{tabular}[t]{@{}l@{}}
+\textbf{Team No.:} Team Number \\[0.8ex]
+\begin{tabular}[t]{@{}l l l l@{}}
+\small\textbf{Name1} & \small\textbf{Name2} & \small\textbf{Name3} & \small\textbf{Name4} \\
+\small SRN1 & \small SRN2 & \small SRN3 & \small SRN4 \\
+\end{tabular}
+\end{tabular} \\
+\hline
+
+\multicolumn{2}{|p{16cm}|}{
+\textbf{Publication:}
+} \\
+\multicolumn{2}{|p{18cm}|}{
+  \begin{tabular}{@{}p{13.5cm} p{3.5cm}@{}}
+    \textbf{Status:} (Published/Accepted/Under Review)\newline
+    (Format is as follows, Replace wherever necessary) - \newline
+    Reza, M. A.; Bisaria, A.; Advaitha, S.; Ponnekanti, A. and Arya, A. (2025). CriX: Intersection of Crime, Demographics and Explainable AI.  In Proceedings of the 17th International Conference on Agents and Artificial Intelligence - Volume 2, ISBN 978-989-758-737-5, ISSN 2184-433X, pages 714-725.  DOI: 10.5220/0013316200003890
+    &
+    \makebox[3.5cm][c]{\raisebox{-0.8\height}{\qrcode[height=2.5cm]
+    % QR should help access the paper
+    {https://www.scitepress.org/Papers/2025/133162/133162.pdf}}}
+  \end{tabular}
+
+} \\
+
+\hline
+\end{tabular}
+
+\end{document}

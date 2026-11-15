@@ -130,13 +130,20 @@ def test_reviewer_approval_verifies_the_auto_routed_tickets():
     assert asyncio.run(find_documents("verdicts", {}))[0]["verdict"] == "true"
 
 
-def test_reviewer_rejection_cancels_the_auto_routed_tickets():
+def test_reviewer_fake_flags_but_does_not_cancel_the_auto_routed_tickets():
     situation_id = upsert(band="Critical")
     escalate(minutes_later=CRITICAL + 1)
     client.post(f"/situations/{situation_id}/decision", json={"decision": "fake"})
     ticket = client.get("/tickets").json()[0]
-    assert ticket["status"] == "cancelled"
+    assert ticket["status"] == "routed" and ticket["reviewer_flag"] == "fake"
     assert situation(situation_id)["status"] == "fake"
+
+
+def test_reject_through_the_api_still_cancels_the_auto_routed_tickets():
+    situation_id = upsert(band="Critical")
+    escalate(minutes_later=CRITICAL + 1)
+    client.post(f"/situations/{situation_id}/decision", json={"decision": "reject"})
+    assert client.get("/tickets").json()[0]["status"] == "cancelled"
 
 
 def test_auto_routed_situations_stay_in_the_review_queue_and_follow_rescoring():

@@ -29,8 +29,8 @@ PIPELINE_POLL_INTERVAL = float(os.getenv("PIPELINE_POLL_INTERVAL", "0.5"))
 # when no reviewer decides within this many minutes. 0 disables a band; bands
 # not listed (Medium, Low) always wait for a reviewer, as do likely-fake ones.
 AUTO_ROUTE_MINUTES = {
-    "Critical": float(os.getenv("AUTO_ROUTE_CRITICAL_MINUTES", "2")),
-    "High": float(os.getenv("AUTO_ROUTE_HIGH_MINUTES", "10")),
+    "Critical": float(os.getenv("AUTO_ROUTE_CRITICAL_MINUTES", "1")),
+    "High": float(os.getenv("AUTO_ROUTE_HIGH_MINUTES", "5")),
 }
 ESCALATION_CHECK_SECONDS = float(os.getenv("ESCALATION_CHECK_SECONDS", "10"))
 

@@ -11,6 +11,18 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+### Models (one-time, ~5.5 GB)
+
+```bash
+python tools/download_models.py           # downloads all 5 models into backend/models/
+python tools/download_models.py --check   # shows which are present
+```
+
+The models are saved as plain folders in `backend/models/` (git-ignored) and loaded from
+there with no network access. A model that isn't downloaded is fetched from Hugging Face on
+first use instead, which stalls the queue — so run the script first. `MODELS_DIR` overrides
+the folder. On a laptop CPU, all five models together take about 1 s per post and 3–3.5 GB of RAM.
+
 Set `MONGO_URI` (default `mongodb://127.0.0.1:27017`) if MongoDB isn't running locally on the
 default port. `CORS_ORIGINS` defaults to `http://localhost:5173` (the Vite dev server) — set it
 to a comma-separated list if the frontend runs elsewhere.
@@ -20,8 +32,8 @@ to a comma-separated list if the frontend runs elsewhere.
 | `MODEL_BACKEND` | `auto` | `hf` = fine-tuned Hugging Face models; `offline` = keyword/hashing heuristics (no downloads, **not** trained models); `auto` = `hf` if torch/transformers/sentence-transformers are installed, else `offline` |
 | `PIPELINE_WORKER_ENABLED` | `true` | Background task that drains the ingestion queue through the full pipeline |
 | `PIPELINE_POLL_INTERVAL` | `0.5` | Seconds the worker sleeps when the queue is empty |
-| `AUTO_ROUTE_CRITICAL_MINUTES` | `2` | Unreviewed Critical situations are auto-routed (unverified) after this; `0` = never |
-| `AUTO_ROUTE_HIGH_MINUTES` | `10` | Same for High. Medium/Low and likely-fake ones always wait for a reviewer |
+| `AUTO_ROUTE_CRITICAL_MINUTES` | `1` | Unreviewed Critical situations are auto-routed (unverified) after this; `0` = never |
+| `AUTO_ROUTE_HIGH_MINUTES` | `5` | Same for High. Medium/Low and likely-fake ones always wait for a reviewer |
 | `ESCALATION_CHECK_SECONDS` | `10` | How often the worker checks for overdue situations |
 | `AUTHOR_HASH_SALT` | `change-me` | Secret salt for `author_ref` hashes — set your own |
 | `DROPPED_RETENTION_DAYS` | `7` | How long `dropped_tweets` are kept (TTL index) |

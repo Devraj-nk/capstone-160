@@ -40,6 +40,9 @@ class RoutingTicket(BaseModel):
     summary_i18n: dict[str, str] = Field(default_factory=dict)
     # False = routed by auto-escalation before any reviewer looked at it.
     verified: bool = True
+    # "fake" when a reviewer marked the situation as possibly fake. The ticket
+    # is still routed: a human decision is a signal for the department, not a veto.
+    reviewer_flag: Optional[str] = None
     status: TicketStatus = "routed"
     history: list[TicketEvent] = Field(default_factory=list)
     created_at: float = Field(default_factory=lambda: time.time())

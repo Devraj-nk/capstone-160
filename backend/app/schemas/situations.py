@@ -6,7 +6,7 @@ from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-# pending -> confirmed (routed) | rejected (not relevant) | fake (marked misinformation)
+# pending -> confirmed (routed, verified) | fake (routed, flagged by a reviewer) | rejected (API only)
 # pending -> auto_routed (no reviewer in time; routed unverified, still reviewable)
 SituationStatus = Literal["pending", "auto_routed", "confirmed", "rejected", "fake"]
 # Statuses a reviewer still has to decide on.
