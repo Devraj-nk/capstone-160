@@ -1,0 +1,1309 @@
+Total report length: 50- 70 pages (around 60 is enough)
+So these are the table of contents:
+
+INTRODUCTION (2 pages done)
+PROBLEM DEFINITION (2 pages done)
+LITERATURE REVIEW
+example (
+3.1 Provably Correct Peephole Optimizations with Alive 
+3.1.1 Introduction
+3.1.2 Characteristics and Implementation 
+3.1.3 Features 
+3.1.4 Evaluation  )
+
+PROJECT REQUIREMENTS SPECIFICATION (7 pages done)
+SYSTEM DESIGN (detailed)
+PROPOSED METHODOLOGY
+IMPLEMENTATION AND PSEUDOCODE (if a4pplicable)
+RESULTS AND DISCUSSION
+CONCLUSION AND FUTURE WORK
+
+all the content you shall append from here onwards. The report should be comprehensive, well-structured, and include relevant diagrams, tables, and references where necessary. Each section should be clearly defined and provide in-depth analysis and discussion of the topic at hand. Ensure that the report adheres to academic standards and includes proper citations for
+
+
+================================================================================
+CHAPTER 0
+ABSTRACT
+================================================================================
+
+During disasters, social media is often the first source of eyewitness reports and requests for help, but in India these posts span many languages and are too numerous and unverified to act on directly. This project presents a multilingual system that turns posts in English, Hindi, Kannada, Tamil and Telugu into verified, prioritised situations for government departments. Posts are cleaned and language-tagged by a two-stage detector (99.24% accuracy), and fine-tuned XLM-RoBERTa models filter disaster-related posts (89.02% accuracy), classify sentiment (82.75%) and detect department needs (micro-F1 0.73). Related posts are grouped using IndicSBERT embeddings, and each situation receives explainable priority and fake-news scores, a multilingual summary and privacy-masked evidence. Human reviewers confirm situations before tickets are routed to every relevant department, and urgent situations are escalated automatically if not reviewed in time. The results show that multilingual crisis posts can be turned into timely, human-validated alerts.
+
+
+
+
+================================================================================
+CHAPTER 3
+LITERATURE REVIEW
+(Target length: 3-4 pages)
+================================================================================
+
+This chapter reviews published work related to the main tasks of the system: multilingual and code-mixed sentiment analysis, disaster-related post detection, and the classification of crisis needs. Each study is summarised by its approach, key findings and limitations in Table 3.1, and the chapter closes with the research gap that motivates this project.
+
+
+3.1 SURVEY OF EXISTING WORK
+
+Table 3.1: Literature Survey
+
+TITLE	APPROACH	KEY FINDINGS	LIMITATIONS
+Enhancing Sentiment Analysis in Multilingual Social Media Data Using Transformer-Based NLP Models [1]	Evaluates TF-IDF with Logistic Regression, LSTMs (GloVe/FastText) and fine-tuned mBERT on a synthetic dataset of 10,000 English–Hindi–Spanish posts.	mBERT achieved the strongest performance, handling code-switching, slang and emojis effectively.	Limitations include synthetic data constraints and limited coverage of real dialect variations.
+Hybrid Deep Learning Approach for Sentiment Analysis on Twitter Data [2]	Applies RNN, Bi-RNN, and LSTM models with Word2Vec embeddings to classify sentiment in large Twitter datasets.	LSTM performed the best, reaching about 83.5% accuracy, and keeping stopwords improved sentiment interpretation.	Limitations include English-only coverage, absence of fine-grained sentiment classes, and lack of modern contextual models like BERT.
+On Enhancing Code-Mixed Sentiment and Emotion Classification Using FNet and FastFormer [3]	Proposes two multitask models that extend XLM-R with FNet and FastFormer layers for joint sentiment and emotion classification of Hindi–English code-mixed tweets (SemEval-2020 SentiMix).	XLMR-FNet performed best, with a weighted F1 score of 71.37 for sentiment and 68.01 for emotion.	Limitations include evaluation on Hindi–English SentiMix data only, extra computational cost from the added layers, and no crisis-specific need detection or routing.
+Feature Aggregation in Zero-Shot Cross-Lingual Transfer Using Multilingual BERT [4]	Improves zero-shot learning by combining lower and upper mBERT layers through attention-based fusion to strengthen multilingual representations.	Shows a 1–3% performance boost, with lower layers aiding transfer to new languages and higher layers supporting syntax understanding.	Limitations include reliance on English-only training, no handling of crisis content, and increased computational load.
+Identifying Disaster-Related Tweets — Large-Scale Model Comparison [5]	Evaluates multiple machine-learning and deep-learning methods for detecting disaster-related tweets across a wide range of crisis scenarios.	Bi-LSTM paired with Word2Vec achieved the strongest F1 score (≈0.92), with deep-learning approaches generally outperforming traditional ML models; using data from multiple events improved generalization	Limitations include English-only data, no support for need detection, offline evaluation, binary labels only, and limited performance when crossing disaster types
+Real-Time Crisis Detection on Social Media Using NLP [6]	Applies deep-learning models and streaming pipelines to monitor social-media posts and detect crisis indicators in real time.	Shows strong performance with around 0.88 accuracy/F1 and identifies crisis signals within minutes by combining sentiment, engagement, and trend patterns.	Limitations include lack of multilingual support, no need-specific classification, absence of routing functionality, and sensitivity to misinformation and classification errors.
+Cross-Lingual Disaster-related Multi-label Tweet Classification with Manifold Mixup [7]	Aggregates existing crisis datasets, including CrisisLexT26 and CrisisNLP, into a multilingual multi-label dataset of over 130K tweets, and fine-tunes Multilingual BERT with Manifold Mixup and a masked loss for partially labelled tweets.	Manifold Mixup improved M-BERT on all four test sets (F1 79.84 to 87.44) and generalised to disasters not seen in training. Zero-shot F1 on languages absent from training was 85.26 for Spanish, 81.33 for French and 75.44 for Italian.	Mainly English and European languages, with no Indian languages; only four broad information classes; classification only, with no sentiment analysis, prioritisation or routing.
+Humanitarian Classification of Crisis-related Microblogs in Bengali: A Comparison of Multilingual Pre-trained Language Models [8]	Builds a multi-label dataset of 2,400 Bengali tweets from Cyclone Amphan labelled with humanitarian categories, and compares fine-tuned multilingual transformers (XLM-R, MuRIL, mBERT, IndicBERT) with general-purpose LLMs (GPT-3.5-Turbo, GPT-4-Turbo).	First study to classify Bengali disaster tweets into humanitarian categories; both disaster-tuned classifiers and general-purpose LLMs achieved reasonable classification.	One language, one disaster and a small dataset; classification only, with no clustering, prioritisation or departmental routing.
+
+
+3.2 RESEARCH GAP
+
+The surveyed studies show that transformer models handle multilingual and code-mixed text well, with XLM-R and mBERT outperforming earlier LSTM and TF-IDF approaches [1], [3]. However, the sentiment studies analyse general emotion and do not detect crisis needs [1], [2], [3]. The code-mixed work covers only Hindi-English [3], and the disaster-detection studies are English-only binary classifiers [5], [6]. Multilingual need classification has been demonstrated mainly for English and European languages [7], while the closest Indian-language crisis study classifies Bengali posts from a single cyclone without grouping, prioritising or routing them [8]. Grouping and ranking have been studied separately. Incremental clustering with sentence embeddings detects events in English tweet streams [13], CURD classifies the urgency of individual English tweets [14], and EventHunter clusters and ranks events with a weighted score, but for security discussions rather than crises [15]. None of these checks reports for misinformation or passes them to a human reviewer.
+
+No surveyed system combines Indian-language analysis, need detection, grouping of related reports into situations, priority and misinformation scoring, and verified routing to government departments. This project addresses that gap.
+
+===================================================================================
+
+
+CHAPTER 4
+PROJECT REQUIREMENTS SPECIFICATION
+4.1 Introduction
+The reason for the existence of this specification document is that it needs to describe, in an unambiguous way, the requirements for the system that need to be fulfilled as well as the attributes that it will have. This will serve as the basis for evaluating the system.
+4.1.1 Project scope
+The system takes in an endless stream of posts on social media, which are processed almost immediately and are turned into structured "situations" that have been prioritised in a way such that the government departments can take action on them. The scope of the project includes:
+•	Ingesting posts from either a social media feed or a simulation feed into streaming queue.
+•	Preprocessing: text cleaning, duplicate and repost detection, and language identification for English, Hindi, Kannada, Tamil and Telugu texts.
+•	Analysis of each post: disaster relevance classification, sentiment analysis, and multi-label departmental need detection, combined into severity and actionability estimates.
+•	Semantic clustering of related posts into clusters using multilingual sentence embeddings.
+•	Cluster-level scoring of priority, credibility and misinformation (fake-news) risk.
+•	Generation of a concise situation summary and extraction of supporting evidence.
+•	A human-in-the-loop review console in which a reviewer approves each situation, marks it as fake or skips it.
+•	Routing of approved situations to the responsible department as tickets with a tracked lifecycle, together with time-bound auto-escalation for critical cases.
+•	An analytics dashboard presenting trends, heatmaps, response-time metrics and daily situation reports. 
+4.2 Product perspective
+The system is a new stand-alone product. The system is not a part of some larger system; rather, it will be positioned between social media channels and command centres within the organization. This product will utilize three layers of implementation: a presentation layer written using React; an application layer implemented as a modular monolith based on FastAPI (one router for each pipeline stage); and a persistence layer using MongoDB. Machine learning models will be loaded into memory by the application layer.
+4.2.1 User Classes and Characteristics
+Table 4.1 lists the users of the system and the technical expertise expected of each.
+
+Table 4.1: User Classes and Characteristics
+User class	Description	Technical expertise
+Human Reviewer	Verifies situations; approves, marks as fake or skips them	Low
+Department Officer	Receives routed tickets; acknowledges and resolves them	Low
+Administrator/Analyst	Monitors queues and analytics; configures thresholds	Moderate to high
+Data Source/Simulator	External system that streams posts into the ingestion API	Not applicable (system actor)
+4.2.2 General Constraints, Assumptions and Dependencies
+Constraints: Official social media streaming APIs are expensive and hence a CSV-based simulator has been used to re-enact actual crisis tweets at customizable frequency. The availability of labelled datasets for code-mixed and low resource Indian languages is a limitation in terms of the maximum accuracy that can be achieved for Kannada, Tamil and Telugu languages. Moreover, the system should operate on commodity hardware without a GPU, thus limiting model capacity and batch sizes. Lastly, no private data can be processed and personal identifiers cannot be stored in plain text format.
+Assumptions: Incoming posts are expected to have textual information of maximum 1000 characters and also have a timestamp. When available, author metadata including account age, follower count and verification status is used to determine the credibility score of a post. Furthermore, a human reviewer is expected to be available during working hours to review pending situations and each department has an officer assigned to act on the tickets routed by the system.
+Dependencies: This model is built using pre-trained and fine-tuned models available on Hugging Face, which includes XLM-R-based disaster, sentiment, needs and language models, as well as l3cube IndicSBERT for embeddings. The backend requires the following python packages: FastAPI, Uvicorn, Pydantic, Motor, Transformers, PyTorch, Sentence-Transformers, scikit-learn, HDBSCAN, langdetect, emoji, and ftfy. For the frontend, React 18, React Router, and Vite have been used.
+4.3 Functional Requirements
+FR-01  Post Ingestion and Validation: The system must be able to receive social media posts using the ingestion endpoint, reject posts based on the rules, and add a unique identifier for each.
+FR-02  Bounded Queueing and Continuous Processing: Posts that have been accepted into the system will be queued using a FIFO queue whose size is configurable. When the queue is full, the system will drop the oldest post from the queue. 
+FR-03  Text Preprocessing and Duplicate Detection: The system will clean each post through either normalization or removal of links, mentions, hashtags, emojis and will check for duplicates and reposts through a text fingerprint to ensure the same text does not go through analysis again.
+FR-04  Multilingual Language Identification: The system should determine the language of every post in English, Hindi, Kannada, Tamil, or Telugu languages.
+FR-05  Disaster Relevance Filtering: The system shall classify each post as disaster-related or not, and only disaster-related posts shall proceed to further.
+FR-06  Sentiment and Need Detection: The system should be able to identify the sentiment and negativity of every post, recognize the department expressed in every post, assign them a multi-label classification with a confidence level, and then integrate those into a single record.
+FR-07  Event Clustering: The system should produce embeddings for each analyzed post and place into the most similar pre-existing cluster, if the criteria are fulfilled, otherwise a new cluster will be formed.
+FR-08  Situation Creation: The system shall promote a cluster to a situation, with status pending, once it reaches the significance threshold.
+FR-09  Priority and Fake Scoring: The system shall compute a priority score and a fake score between 0 and 1 for each situation. The priority score shall be mapped to one of four bands: Critical, High, Medium or Low. A situation whose fake score reaches the flag threshold of 0.60 shall be flagged as likely misinformation.
+FR-10  Summarisation and Evidence Extraction: The system must provide a brief, comprehensible summary of the situation, choose the most relevant and important postings to serve as evidence.
+FR-11  Human Review: system shall present pending situations to a reviewer ordered by priority, showing the summary and other information, and shall allow the reviewer to approve the situation, mark it as fake or skip it. Approved situations are routed as verified tickets; situations marked as fake are routed with unverified tickets flagged as fake, so the department knows the reviewer doubted them.
+FR-12  Departmental Routing and Ticket Tracking: Upon its approval, the process will then channel the issue to the appropriate department. Officers will have the capability of transitioning from routed to acknowledged to resolved status.
+FR-13  Analytics and Reporting: The system will allow a dashboard that will display number of situations per status and per department, hourly trend analysis, heat maps based on hours and the daily situation report will be available for the date selected.
+4.4 Non-Functional Requirements
+NFR-01  Real-Time Processing: There will be no wait time between post validation and ingestion to avoid any delays due to analysis. The background worker will poll the queue every 0.5 seconds.
+NFR-02  Dashboard Response Time: Dashboard and Analytics API requests should respond within 2 seconds for the amount of data that would be processed in a normal day.
+NFR-03  Privacy of Personal Data: Only those posts that are publicly visible will be processed. No author information shall ever be stored in plaintext format and must be converted into a salted SHA-256 hash. Phone numbers and other such personal details in the evidence text must be sanitized.
+NFR-04  Scalability: The queue interface, worker, and storage must be designed in such a way that the in-memory queue is replaceable by a distributed message broker systems.
+NFR-05  Durability: Persist all cases, review decisions, and tickets in the database such that the state of the system is maintained after a restart of the application.
+ 
+4.5 External interface requirements
+This section describes how the system interacts with its users, the hardware it runs on, the software it depends on, and the other systems it communicates with. The user interface requirements set out what the reviewer and department officers see and can do on each screen. The hardware and software requirements give the minimum environment needed to deploy and run the system, as well as the setup used to train the models. The communication interfaces define the protocols and data formats used between the frontend, the backend, the database and external source
+4.5.1 User Interfaces
+Table 4.2 lists the main user interface components.
+
+Table 4.2: User Interface Components
+ID	UI Component	Description
+UI-01	Review Console	Displays priority-based situation cards with summaries, indicators, evidence posts and Approve, Mark Fake and Skip actions.
+UI-02	Situation Routing Dashboard	Shows situation statistics, department-wise counts, trends, heatmaps and response-time metrics with filters.
+UI-03	Report Page	Generates a printable daily situation report for a selected date.
+UI-04	Department Colour Scheme	Uses consistent department-specific colours across all screens for easy identification.
+4.5.2 Software Requirements
+Table 4.3 lists the software needed to build and run the system.
+
+Table 4.3: Software Requirements
+Category	Software / Library
+Programming languages	Python 3.10+, JavaScript (ES2020)
+Backend framework	FastAPI, Uvicorn, Pydantic
+Database	MongoDB 6+, Motor (async driver)
+Machine learning	PyTorch, Hugging Face Transformers, SentencePiece
+Embeddings/clustering	Sentence-Transformers, scikit-learn, HDBSCAN
+Text processing	langdetect, emoji, ftfy, re
+Frontend	React 18, React Router 6, Vite 5
+Testing	pytest, mongomock-motor, httpx
+Development tools	Git/GitHub, VS Code, Jupyter / Google Colab
+
+4.5.3 Hardware Requirements
+HW-01  Deployment: The system shall run on a single commodity machine without a GPU. All models run on the CPU and are loaded once into the backend process.
+HW-02  Storage: The machine shall have enough disk space for the downloaded model weights and the MongoDB database.
+HW-03  Training: Model training is done offline on GPUs (NVIDIA Tesla P100 and T4 in Kaggle notebooks) and is not required to deploy the system.
+
+4.5.4 Communication Interfaces
+CI-01  Frontend to backend: The React frontend shall communicate with the FastAPI backend over HTTP using REST requests and JSON responses. The backend runs on port 8000 and the development frontend on port 5173, with cross-origin requests allowed only from the configured frontend origin.
+CI-02  Data source to backend: The simulator, or any social media adapter, shall send each post as a JSON object in an HTTP POST request to the /ingest endpoint.
+CI-03  Backend to database: The backend shall connect to MongoDB (default port 27017) through the asynchronous Motor driver.
+CI-04  Models: Model weights shall be stored locally, so that the backend can run without network access once they have been downloaded.
+
+
+
+
+
+================================================================================
+CHAPTER 5
+SYSTEM DESIGN
+(Target length: 10-12 pages including figures and tables)
+================================================================================
+
+This chapter presents the design of the system at two levels. The High-Level Design (HLD) describes the architectural style, the major layers and modules, and how data flows between them. The Low-Level Design (LLD) then describes each module in detail: its classes and data structures, the algorithms and formulas it applies, its parameters, and the database and API contracts through which modules communicate. Step-by-step pseudocode for the main algorithms is deferred to Chapter 7.
+
+
+5.1 DESIGN APPROACH
+
+5.1.1 Architectural Style
+The system combines three architectural styles, each chosen for a specific reason:
+
+  a) Layered architecture: responsibilities are separated into ingestion, intelligence (processing and analysis), persistence, human review and presentation layers. Each layer depends only on the layer beneath it, which keeps the design easy to reason about and to test.
+  b) Event-driven pipeline: every incoming post is treated as an event that triggers the processing chain as soon as it arrives, rather than being collected for periodic batch processing. This is what makes near-real-time detection possible.
+  c) Three-tier modular monolith: the application is deployed as three tiers — a React presentation tier, a FastAPI application tier and a MongoDB data tier. The application tier is a single process, but each pipeline stage is an independent Python package with its own router. This gives the separation of a microservice design without the operational cost of running and coordinating many services, which is not justified at prototype scale.
+
+5.1.2 Design Principles
+  - Separation of concerns: models, scoring, persistence and HTTP handling live in separate packages (analysis, scoring, pipeline, routers, db).
+  - Cluster-level decisions: a single post is never routed on its own. Decisions are made on clusters of related posts, which are more robust to noise and individual misinformation.
+  - Human-in-the-loop by default: automation prepares and ranks situations; a reviewer makes the routing decision, except for a narrow, time-bound escalation path for urgent cases.
+  - Privacy by design: personal identifiers are removed or hashed at the earliest point in the pipeline, before anything is stored.
+  - Explainability: every score is a weighted combination of named, interpretable terms, and the matched keywords and evidence are stored so a reviewer can see why a situation was scored as it was.
+  - Graceful degradation: missing inputs are skipped and the remaining weights renormalised; if the transformer models are unavailable, offline stand-in models are used.
+
+
+5.2 HIGH-LEVEL DESIGN
+
+5.2.1 System Architecture
+Figure 5.1 shows the high-level architecture of the system.
+
+  [Figure 5.1: High-Level Architecture of the System — docs/HLD.png]
+
+The architecture consists of the following layers:
+
+  1. Ingestion Layer: receives real-time posts from social-media APIs or, in the prototype, from a simulator that replays a CSV of real crisis posts. Each post is validated and tagged with metadata before being forwarded as an event.
+  2. Intelligence Runtime Layer: the core of the system, operating in an event-driven manner. It contains:
+       - the Streaming Queue, which buffers events between ingestion and processing;
+       - the Preprocessing Module, which cleans text and detects language;
+       - the Situation Analysis Engine, which classifies posts, groups them into situations, and computes fake-news risk and priority;
+       - the Summarization Engine, which generates a concise situation summary;
+       - the Evidence Extractor, which selects the top supporting posts and their metadata.
+  3. Persistence Layer: the Metadata Catalog and Evidence Store hold processed posts, clusters, situations, evidence, reviewer verdicts and routing tickets.
+  4. Human Review Interface: a reviewer confirms or rejects each situation before it is acted upon.
+  5. Situation Routing Dashboard: routes confirmed situations to the owning department.
+  6. Dashboard and Analytics Layer: presents trends, heatmaps and daily reports to decision-makers.
+
+5.2.2 Data Flow
+Figure 5.2 shows the end-to-end data flow as swimlanes, one per layer.
+
+  [Figure 5.2: End-to-End Data Flow — docs/data_flow_swimlanes.jpg]
+
+A post moves through the system in the following sequence:
+
+  1. The simulator (or a social-media source) sends the post to the ingestion endpoint, which validates it and places it on the queue.
+  2. A background worker removes the post from the queue and cleans it. Invalid posts and reposts are dropped at this point, and the reason is recorded.
+  3. The language is identified and the disaster classifier decides whether the post is about a crisis. Non-disaster posts are dropped.
+  4. Sentiment and departmental needs are predicted, and the results are combined into one analysed record.
+  5. The record is embedded and assigned to an event cluster.
+  6. Once a cluster has at least three posts, it is scored (credibility, misinformation risk, priority), summarised, and its evidence is selected. The result is stored as a situation with status "pending".
+  7. The reviewer approves or rejects the situation in the review console. Approved situations are routed to departments as tickets. Urgent situations that are not reviewed in time are escalated automatically.
+  8. The dashboard and daily reports read the stored situations and tickets.
+
+5.2.3 Module Decomposition
+Figure 5.3 shows how the system is decomposed into modules and how they depend on one another.
+
+  [Figure 5.3: Module Relationship Diagram — docs/classDiagrams/ModulesRelation.png]
+
+Table 5.1 maps each logical module to its implementation package.
+
+Table 5.1: Module Decomposition
+
+  Module                 | Responsibility                                         | Implementation
+  -----------------------|--------------------------------------------------------|-----------------------------------------------
+  Presentation           | Review console, dashboard, reports                     | frontend/src (React pages, API client)
+  Orchestration          | HTTP entry point, router registration, start-up        | app/main.py, app/routers/*
+  Input Processing       | Ingestion, queue, cleaning, deduplication, language    | routers/ingestion.py, routers/queue.py, preprocessing/*
+  Analysis               | Disaster, sentiment and need models; combine step      | analysis/*
+  Clustering             | Embeddings, incremental clustering, persistence        | analysis/clustering.py, analysis/embedding.py, pipeline/cluster_store.py
+  Scoring                | Credibility, fake-news risk, priority                  | scoring/*
+  Situation              | Situation construction, lifecycle, rescoring           | pipeline/situation_builder.py, pipeline/orchestrator.py
+  Evidence               | Summary, evidence ranking, privacy masking             | scoring/summary_evidence.py, evidence/*
+  Review and Routing     | Decisions, tickets, auto-escalation                    | routers/situations.py, pipeline/tickets.py, pipeline/escalation.py
+  Analytics              | Trends, heatmaps, response metrics, daily reports      | analytics/*
+  Persistence            | Shared MongoDB access                                  | app/db.py
+
+5.2.4 Deployment View
+The system is deployed as three processes:
+
+  - Backend process: a single Uvicorn server (port 8000) that hosts the FastAPI application and, within the same process, an asynchronous background worker. The worker drains the queue, runs the pipeline and performs periodic escalation and daily-report checks. All machine-learning models are loaded once into this process.
+  - Frontend: the React application, served by the Vite development server (port 5173) during development or as a static build in deployment.
+  - Database: a MongoDB server.
+
+The simulator runs as a separate script that sends posts to the backend over HTTP. Figure 5.4 shows the deployment of these processes, and Figure 5.5 shows the sequence of calls as a post moves through the system.
+
+  [Figure 5.4: System Deployment Diagram — SystemDeployment in system-sequence-deployment.puml]
+  [Figure 5.5: System Sequence Diagram — SystemSequence in system-sequence-deployment.puml]
+
+
+5.3 LOW-LEVEL DESIGN
+
+This section describes the internal design of the backend. Design patterns shared by several modules are described once, followed by the logic specific to each stage of the pipeline.
+
+5.3.1 Common Design Patterns
+  a) Request handling: every module follows the same structure. A router validates the request, a module function applies the logic, and a shared database helper (app/db.py) performs all storage operations.
+  b) Data contracts: data passed between modules is defined as Pydantic schemas, so invalid data is rejected at the boundary.
+  c) Model wrapper: the language, disaster, sentiment and need classifiers share one design. Each model is loaded once on first use, truncates input to a fixed length (128 tokens, or 96 for language identification), runs in inference mode and returns a plain dictionary. An offline stand-in with the same interface is used when the transformer libraries are unavailable.
+  d) Weighted scoring: every score lies in [0, 1] and is a weighted sum of named terms. A missing term is skipped and the remaining weights are renormalised. All weights and thresholds are defined in scoring/config.py.
+
+5.3.2 Core Classes
+Figure 5.6 shows the main classes and their associations, and Table 5.2 describes their roles.
+
+  [Figure 5.6: High-Level Class Diagram — docs/classDiagrams/HighLevelClass.png]
+
+Table 5.2: Core Classes
+
+  Class                              | Responsibility                                    | Key members
+  -----------------------------------|---------------------------------------------------|------------------------------------------------
+  RawEvent, IngestedEvent, QueueItem | Represent a post from arrival until processing    | text, created_at, ingested_at, metadata
+  PipelineOrchestrator               | Runs one post through every stage                 | analyze(), process_event(), restore_clusters()
+  ClusterManager                     | Assigns posts to clusters                         | assign_record(), periodic_recluster()
+  Cluster                            | Holds one live event                              | members, embeddings, centroid, dept_relevance
+  Situation                          | Stores a scored event and its review state        | status, priority, fake_news, summary, evidence_posts
+  EvidenceItem                       | Stores one masked supporting post                 | post_id, text, score, why
+  RoutingTicket, TicketEvent         | Track one situation in one department             | department, status, verified, history
+
+5.3.3 Pipeline Processing
+A background worker takes each post from the bounded FIFO queue and passes it to the orchestrator. CPU-bound analysis runs in a separate thread so that the API remains responsive, and a lock ensures that only one post updates the in-memory clusters at a time. Table 5.3 summarises each processing stage. Results are then written to MongoDB asynchronously. A failure in one post is logged and does not stop the stream. Every 10 seconds, the worker also checks for overdue situations. Table 5.3 lists the processing stages.
+
+Table 5.3: Pipeline Processing Stages
+
+  Stage              | Method                                                                    | Outcome
+  -------------------|---------------------------------------------------------------------------|-----------------------------------
+  Cleaning           | Repair Unicode, convert emojis to text, remove URLs, mentions and symbols | Empty post dropped as invalid
+  Repost detection   | SHA-256 fingerprint of the normalised text                                | Exact repeat dropped as repost
+  Language detection | Unicode script ranges, then XLM-R language model for Latin-script text    | Language, romanised and code-mixed flags
+  Disaster filter    | Fine-tuned XLM-R binary classifier                                        | Dropped if P(disaster) < 0.5
+  Sentiment          | Fine-tuned XLM-R classifier                                               | Label and negativity score
+  Need detection     | Fine-tuned multi-label XLM-R classifier                                   | Probability for each of four needs
+  Embedding          | IndicSBERT sentence encoder                                               | 768-dimensional vector
+
+5.3.4 Incremental Clustering
+Each post is compared with the live clusters as soon as it arrives. It joins the most similar cluster that satisfies all four conditions below; otherwise, it starts a new cluster.
+  1. Cosine similarity with the cluster centroid is at least 0.32.
+  2. The post is within 48 hours of the cluster's latest post.
+  3. At least one department has a need score above 0.3 in both the post and the cluster.
+  4. If both name a place, they share at least one place name.
+
+The centroid is recalculated whenever a post joins. A cluster with at least three posts becomes a situation. Active clusters are stored in MongoDB and restored at start-up, so a restart does not create duplicate situations.
+
+5.3.5 Cluster Scoring
+Copies are first grouped so that repeated content is not counted as independent evidence. Two posts are treated as copies if their normalised text is identical or their embedding similarity is at least 0.92. Table 5.4 gives the scoring formulas.
+
+Table 5.4: Scoring Formulas
+
+  Score              | Formula
+  -------------------|---------------------------------------------------------------------------------------------
+  Severity           | 0.40 Disaster confidence + 0.30 Negativity + 0.30 Severity keywords
+  Actionability      | 0.40 Need confidence + 0.35 Urgency keywords + 0.25 Specificity
+  Credibility        | 0.35 Cluster consistency + 0.30 Text quality + 0.20 Model confidence + 0.15 Specificity
+  Corroboration      | 0.70 Report volume + 0.30 Language diversity
+  Amplification risk | 0.45 Duplicate ratio + 0.30 Copy burst + 0.25 Forward ratio
+  Fake score         | 0.385 (1 - Credibility) + 0.230 Content risk + 0.385 Amplification risk
+  Priority           | 0.30 Severity + 0.25 Actionability + 0.20 Corroboration + 0.15 Credibility + 0.10 Recency
+
+Cluster severity and actionability are the mean of the top three posts, and recency has a half-life of 6 hours. A situation with a fake score of at least 0.60 is flagged as likely fake. Priority bands are Critical (>= 0.75), High (>= 0.55), Medium (>= 0.35) and Low (< 0.35).
+
+5.3.6 Summary and Evidence
+The summary is generated from a template whose slots (event, location, impact, urgency, report count, time span and main needs) are computed from the cluster. A slot with no data is omitted, so the summary cannot state unsupported facts. It is produced in English, Hindi, Kannada, Tamil and Telugu.
+
+Up to five independent posts are selected as evidence, using:
+
+  EvidenceScore = 0.6 x Similarity + 0.4 x PostStrength
+  PostStrength  = 0.4 x Specificity + 0.3 x Actionability + 0.3 x Credibility
+
+Only one post is taken from each copy group, and languages are kept diverse. Before storage, phone numbers and address fields are masked, and author identifiers are replaced by a salted SHA-256 hash.
+
+5.3.7 Review, Routing and Escalation
+Situations and routing tickets are both implemented as state machines, as shown in Figures 5.7 and 5.8 and summarised in Table 5.5.
+
+  [Figure 5.7: Situation State Diagram — SituationLifecycle in docs/classDiagrams/lld-state-diagrams.puml]
+  [Figure 5.8: Routing Ticket State Diagram — TicketLifecycle in docs/classDiagrams/lld-state-diagrams.puml]
+
+Table 5.5: Situation and Ticket State Transitions
+
+  Entity    | Transition                         | Trigger and effect
+  ----------|------------------------------------|---------------------------------------------------------------
+  Situation | pending -> confirmed               | Reviewer approves; verified tickets are opened
+  Situation | pending -> fake                    | Reviewer marks as fake; tickets are opened with a warning flag
+  Situation | pending -> rejected                | Reviewer rejects; open tickets are cancelled
+  Situation | pending -> auto_routed             | Review deadline passes; unverified tickets are opened
+  Ticket    | routed -> acknowledged -> resolved | Department officer updates the ticket
+  Ticket    | routed/acknowledged -> cancelled   | The situation is rejected
+
+An auto-routed situation remains in the review queue and can still be approved, marked as fake or rejected. New posts rescore a situation without changing its review state.
+
+Routing: one ticket is opened for each department whose need exceeds its threshold: Healthcare (0.65), Law & Order (0.65), Tourism (0.75) and Public Municipal (0.80). If no need qualifies, the situation is routed to Disaster Management. A unique index on situation and department prevents duplicate tickets.
+
+Escalation: a pending Critical situation is routed automatically after 1 minute and a High situation after 5 minutes, unless it is flagged as likely fake. The status is updated conditionally before tickets are opened, so an automatic escalation cannot conflict with a reviewer's decision made at the same moment.
+
+
+5.4 DATABASE DESIGN
+
+MongoDB was chosen because situation documents are nested and change shape as the pipeline evolves (scores, evidence lists, multilingual summaries, score history). A document store holds this without schema migrations. Each situation embeds its summary and evidence, so a rescore replaces them in a single atomic write. Figure 5.9 shows how the collections relate to one another.
+
+  [Figure 5.9: Collection Relationship Diagram — Collections in docs/classDiagrams/lld-state-diagrams.puml]
+
+Table 5.6 describes the collections.
+
+Table 5.6: Database Collections
+
+  Collection       | One document per                 | Key fields                                           | Indexes
+  -----------------|----------------------------------|------------------------------------------------------|-------------------------------------------
+  tweets           | Post that passed both gates      | id, text (masked), lang, model outputs, cluster_id, embedding | id (unique), cluster_id, created_at
+  dropped_tweets   | Post removed by a gate           | tweet_id, reason, detail, dropped_at, expires_at     | (reason, dropped_at); TTL on expires_at (7 days)
+  clusters         | Live event cluster               | id, centroid, size, tweet_ids, dept_relevance, active| id (unique); (active, last_updated_at)
+  situations       | Cluster promoted to a situation  | id, cluster_id, status, priority, fake_news, needs, summary, evidence_posts, score_history | id, cluster_id (unique); (status, priority_score)
+  verdicts         | Reviewer decision                | situation_id, decision, snapshot, decided_at         | situation_id; decided_at
+  routing_tickets  | (Situation, department) pair     | id, situation_id, department, status, band, verified, history | id (unique); (situation_id, department) unique; (department, status, queue_priority)
+  daily_reports    | Calendar day (IST)               | id (date), report contents                           | id (unique)
+  evidence         | Standalone evidence (API only)   | post_id, cluster_id, text, score                     | cluster_id
+
+The relationships between collections are: one cluster has one situation; one situation has many tweets, many verdicts and one ticket per department. The indexes are chosen to match the system's actual queries. For example, the review queue query (status, sorted by priority) and the department queue query (department, status, sorted by priority) each use a dedicated compound index.
+
+
+5.5 API DESIGN
+
+The backend exposes a REST/JSON API. FastAPI generates OpenAPI documentation automatically at /docs. Table 5.7 lists the main endpoints.
+
+Table 5.7: Main API Endpoints
+
+  Method | Endpoint                               | Purpose
+  -------|----------------------------------------|----------------------------------------------------
+  POST   | /ingestion/ingest                      | Accept a raw post and enqueue it
+  GET    | /queue/stats                           | Queue size and capacity
+  POST   | /pipeline/process                      | Run one post through the full pipeline synchronously (testing)
+  POST   | /pipeline/drain                        | Process up to N queued posts immediately
+  GET    | /pipeline/stats                        | Pipeline counters (per stage, errors, model backend)
+  POST   | /pipeline/escalate                     | Trigger the escalation check manually
+  POST   | /preprocessing/preprocess              | Clean text and detect language for a post
+  POST   | /analysis/analyze                      | Run the analysis models on a post
+  POST   | /clustering/assign, /clustering/recluster | Assign a post to a cluster; merge similar clusters
+  POST   | /summarization/summarize               | Summarise a list of texts
+  POST   | /evidence/extract, /evidence/store     | Rank evidence posts; store evidence
+  GET    | /situations?status=&department=        | List situations, highest priority first
+  GET    | /situations/{id}                       | One situation
+  GET    | /situations/{id}/evidence              | Its ranked, masked evidence posts
+  POST   | /situations/{id}/decision              | Reviewer decision: approve, reject or fake
+  GET    | /tickets?department=&status=           | Department ticket queue
+  POST   | /tickets/{id}/status                   | Acknowledge or resolve a ticket
+  GET    | /analytics/summary, /trends, /heatmaps, /response, /filtered | Dashboard data
+  GET    | /reports/daily, /reports/daily/{day}, /reports/daily/today | Daily reports
+  POST   | /reports/daily/{day}                   | Rebuild a daily report
+  GET    | /health                                | Liveness check
+
+The per-stage endpoints (preprocessing, analysis, clustering, summarisation, evidence) expose each module independently. This allows a module to be tested and demonstrated on its own, while the background worker calls the same functions directly within the process.
+
+
+5.6 USER INTERFACE DESIGN
+
+The React frontend has four routes, listed in Table 5.8, and communicates with the backend only through a thin API client (src/api/client.js).
+
+Table 5.8: Frontend Routes
+
+  Route          | Screen            | Content
+  ---------------|-------------------|-----------------------------------------------------------------
+  /              | Review Console    | Queue of pending and auto-routed situations, ordered by priority. Each card shows the summary, band, departments, credibility, fake-risk flag, languages and evidence posts, with Approve and Mark-as-Fake actions
+  /dashboard     | Routing Dashboard | Summary tiles, department workload and open tickets, trends, heatmaps, response metrics, filtered-post statistics and department ticket queues
+  /reports       | Report List       | Available daily reports
+  /reports/:day  | Daily Report      | Printable situation report for the selected day
+
+Each department is assigned a fixed colour (src/departments.js), which is used consistently on every screen so that departments can be recognised at a glance.
+
+
+5.7 DESIGN DECISIONS AND TRADE-OFFS
+
+Table 5.9 summarises the main design decisions, the alternatives that were considered and the reason for each choice.
+
+Table 5.9: Design Decisions and Trade-offs
+
+  Decision                                | Alternative considered        | Reason for choice
+  ----------------------------------------|-------------------------------|---------------------------------------------------------
+  Modular monolith                        | One microservice per layer    | Same separation of code with far less operational overhead at prototype scale
+  In-memory bounded queue                 | Kafka / Redis                 | Sufficient for prototype traffic; isolated behind two functions so it can be replaced
+  Incremental clustering + periodic HDBSCAN | Batch HDBSCAN only          | Posts must join a cluster immediately to support real-time detection
+  Template-based summary                  | Abstractive mT5               | Cannot invent facts; produces all five languages consistently
+  Cluster-level routing                   | Per-post routing              | Robust to noise and single misleading posts
+  Interpretable weighted scores           | End-to-end learned scorer     | No labelled priority data available; reviewers need explainable scores
+  Single-threaded analysis under a lock   | Parallel workers              | Keeps in-memory cluster state consistent; can be scaled with a shared cluster store later
+  MongoDB                                 | Relational database           | Nested, evolving documents; embedded evidence allows atomic rescoring
+
+
+
+
+
+
+
+
+
+
+================================================================================
+CHAPTER 7
+IMPLEMENTATION AND PSEUDOCODE
+(Target length: 12-14 pages including figures and tables)
+================================================================================
+
+This chapter describes how the design presented in Chapter 5 was implemented. It covers the development environment, the structure of the code, and the implementation of each pipeline stage, from ingestion to the user interface. The main algorithms are given as pseudocode. Formulas, weights and thresholds are defined in Table 5.4 and Section 5.3 and are referred to here rather than repeated.
+
+
+7.1 DEVELOPMENT ENVIRONMENT
+
+The system was developed in Python and JavaScript using open-source libraries. Table 7.1 lists the technologies used and the minimum version required by the project's dependency files.
+
+Table 7.1: Technology Stack
+
+  Layer                | Technology                               | Version       | Use
+  ---------------------|------------------------------------------|---------------|----------------------------------------------
+  Backend language     | Python                                   | 3.10 or later | Pipeline, API and tools
+  Web framework        | FastAPI, Uvicorn                         | 0.110, 0.29   | REST API and application server
+  Data validation      | Pydantic                                 | 2.7           | Request and data schemas
+  Database             | MongoDB, Motor (asynchronous driver)     | Motor 3.4     | Persistent storage
+  Deep learning        | PyTorch, Hugging Face Transformers       | 2.2, 4.40     | Classifier inference
+  Sentence embeddings  | Sentence-Transformers                    | 3.0           | IndicSBERT embeddings
+  Clustering           | NumPy, HDBSCAN                           | HDBSCAN 0.8.33| Vector operations and cluster merging
+  Text processing      | ftfy, emoji                              | 6.2, 2.11     | Unicode repair and emoji conversion
+  Frontend             | React, React Router, Vite                | 18.3, 6.24, 5.3 | User interface and build tool
+  Testing              | pytest, mongomock-motor                  | 8.0, 0.0.34   | Automated tests with an in-memory database
+  Simulator            | HTTPX                                    | 0.27          | Streams sample posts to the API
+
+
+7.2 PROJECT STRUCTURE
+
+The code is organised into a backend, a frontend and supporting tools. The backend application contains about 5,200 lines of Python, the frontend about 2,100 lines of JavaScript, JSX and CSS, and the automated tests about 2,200 lines of Python.
+
+  capstone-160/
+    backend/
+      app/
+        main.py           Application entry point and start-up sequence
+        config.py         Settings read from environment variables
+        db.py             MongoDB helpers and index definitions
+        routers/          HTTP endpoints, one module for each layer
+        schemas/          Pydantic data contracts
+        preprocessing/    Cleaning, repost detection, language detection
+        analysis/         Model wrappers, embeddings, clustering
+        scoring/          Features, lexicons, scores, summaries, evidence
+        pipeline/         Orchestrator, worker, situations, tickets, escalation
+        evidence/         Privacy masking and evidence ranking
+        analytics/        Dashboard metrics and daily reports
+      models/             Local copies of the five transformer models
+      tests/              Automated test suite
+      tools/              Simulator, model downloader, demonstration data
+    frontend/
+      src/
+        api/client.js     All calls to the backend API
+        pages/            Review console, dashboard, reports
+        components/       Charts and analytics panels
+
+
+7.3 APPLICATION START-UP AND CONFIGURATION
+
+When the backend starts, it performs four steps before accepting traffic:
+
+  1. It selects the model backend (trained models or offline stand-ins).
+  2. It creates the MongoDB indexes. This operation is idempotent, so existing indexes are left unchanged.
+  3. It restores the active clusters from MongoDB, so that posts about a known event continue to join the same cluster after a restart.
+  4. It starts the background worker that processes the queue.
+
+If MongoDB cannot be reached during steps 2 and 3, a warning is logged and the API still starts. Deployment settings are read from environment variables, as listed in Table 7.2. Scoring weights and thresholds are kept separately in scoring/config.py.
+
+Table 7.2: Main Configuration Parameters
+
+  Parameter                   | Default                    | Purpose
+  ----------------------------|----------------------------|-----------------------------------------------------
+  MONGO_URI, MONGO_DB_NAME    | Local server, crisis_monitor | Database connection
+  QUEUE_MAX_SIZE              | 500                        | Maximum number of posts held in the queue
+  MODEL_BACKEND               | auto                       | Use trained models if available (hf, offline or auto)
+  PIPELINE_POLL_INTERVAL      | 0.5 s                      | Worker wait time when the queue is empty
+  AUTO_ROUTE_CRITICAL_MINUTES | 1                          | Review deadline for Critical situations
+  AUTO_ROUTE_HIGH_MINUTES     | 5                          | Review deadline for High situations
+  ESCALATION_CHECK_SECONDS    | 10                         | Interval between checks for overdue situations
+  AUTHOR_HASH_SALT            | Set per deployment         | Secret salt for author hashes
+  DROPPED_RETENTION_DAYS      | 7                          | Retention period for dropped posts
+  ANALYTICS_TZ_OFFSET_MINUTES | 330 (IST)                  | Time zone for daily reports and heatmaps
+
+
+7.4 INGESTION AND THE STREAMING QUEUE
+
+Posts enter the system through POST /ingestion/ingest. Pydantic validates each request: the text must contain between 1 and 1,000 characters, and any additional source fields are kept as attributes. The post is then assigned a unique identifier and an ingestion timestamp, and is placed on the queue.
+
+The queue is an in-memory double-ended queue. When it is full, the oldest post is removed so that the newest reports are always retained, and the API response reports that this has happened. A single background task, started with the application, removes posts from the queue one at a time. Algorithm 7.1 shows both operations.
+
+Algorithm 7.1: Bounded Queue and Background Worker
+
+  procedure ENQUEUE(item)
+      droppedOldest <- false
+      if size(Q) >= QUEUE_MAX_SIZE then
+          remove the oldest item from Q
+          droppedOldest <- true
+      append item to Q
+      return droppedOldest
+
+  procedure WORKER()
+      lastCheck <- 0
+      loop forever
+          if now() - lastCheck >= ESCALATION_CHECK_SECONDS then
+              lastCheck <- now()
+              ESCALATE-OVERDUE()                  // Algorithm 7.11
+              STORE-PREVIOUS-DAY-REPORT()
+          item <- remove the oldest item from Q
+          if item is empty then
+              sleep(PIPELINE_POLL_INTERVAL)
+          else
+              PROCESS-POST(item)                  // Algorithm 7.2
+
+The periodic checks run even when no posts are arriving, so an urgent situation is still escalated during a quiet period.
+
+
+7.5 PIPELINE ORCHESTRATION
+
+The PipelineOrchestrator class connects all processing stages. Model inference is CPU-intensive, so the analysis stages run in a separate thread through asyncio.to_thread, which keeps the API responsive while a post is being processed. A lock allows only one post at a time to change the in-memory clusters. Database writes then take place asynchronously. Algorithm 7.2 shows the complete flow for one post.
+
+Algorithm 7.2: Processing One Post
+
+  Input : ingested event e
+  Output: final stage reached by the post
+
+  procedure PROCESS-POST(e)
+      text <- CLEAN-TEXT(e.text)                      // Algorithm 7.3
+      if text contains no letter or digit then
+          log as dropped (invalid); return "invalid"
+      acquire lock
+      if REGISTER-REPOST(text) > 1 then
+          log as dropped (repost); return "repost"
+      lang <- DETECT-LANGUAGE(text)                   // Algorithm 7.4
+      pDisaster <- DISASTER-MODEL(text)
+      if pDisaster < threshold then
+          log as dropped (not_disaster); return "non_disaster"
+      sentiment <- SENTIMENT-MODEL(text)
+      needs <- NEED-MODEL(text)                       // Algorithm 7.5
+      record <- merge(e, lang, pDisaster, sentiment, needs)
+      C <- ASSIGN-TO-CLUSTER(record)                  // Algorithm 7.6
+      clock <- max(clock, record.created_at)
+      if size(C) >= 3 then
+          situation <- BUILD-SITUATION(C, clock)      // Algorithms 7.7 to 7.9
+      release lock
+      store record and cluster state in MongoDB
+      if situation exists then
+          insert or update the situation for cluster C
+          return "situation"
+      return "holding"
+
+Three implementation decisions make the pipeline reliable:
+
+  a) Failure isolation: PROCESS-POST catches every exception, records it in the pipeline statistics and returns the stage "error". A malformed post therefore cannot stop the stream.
+  b) Safe reprocessing: posts are written using their identifier as the key, and each cluster has exactly one situation. Replaying the same data updates existing documents instead of creating duplicates.
+  c) Protected review state: a rescore can change only analytical fields such as scores, summary and evidence. The review status and decision are never overwritten. The last 20 scores are kept in a score history, which the dashboard uses to display the trend in priority.
+
+Recency is measured against a simulation clock, which holds the newest post time seen so far. Replayed historical data is therefore scored in the same way as live data.
+
+
+7.6 PREPROCESSING AND LANGUAGE DETECTION
+
+Algorithm 7.3 shows text cleaning and repost detection. Regular-expression word classes are deliberately avoided when removing symbols, because they do not match Indic vowel signs and viramas and would break words written in Indian scripts. Each character is instead retained or removed according to its Unicode category.
+
+Algorithm 7.3: Text Cleaning and Repost Detection
+
+  procedure CLEAN-TEXT(text)
+      text <- repair broken Unicode encoding (ftfy)
+      text <- replace each emoji with its text description
+      remove URLs and @mentions
+      for each character ch in text do
+          if ch is not a letter, digit, combining mark, space or
+                  permitted punctuation mark then
+              replace ch with a space
+      collapse repeated whitespace
+      return text
+
+  procedure REGISTER-REPOST(text)
+      normalised <- lowercase text without a leading "RT" marker
+      fingerprint <- SHA-256(normalised)
+      count[fingerprint] <- count[fingerprint] + 1
+      return count[fingerprint]
+
+Language detection follows the two-stage approach shown in Algorithm 7.4. Text in a native script is identified directly from its Unicode range without running a model. The trained classifier is used only for Latin-script text, where English and romanised Indian languages cannot be told apart by script.
+
+Algorithm 7.4: Two-Stage Language Detection
+
+  procedure DETECT-LANGUAGE(text)
+      for each lang in {hi, kn, ta, te} do
+          count[lang] <- number of characters of text in the script of lang
+      best <- language with the highest count
+      if count[best] >= 3 then
+          lang <- best
+          romanised <- false
+      else
+          lang <- LANGUAGE-MODEL(text)
+          romanised <- (lang != en)
+      latin <- number of Latin letters in text
+      codeMixed <- (count[best] >= 3) and (latin >= 5)
+      return lang, romanised, codeMixed
+
+
+7.7 MODEL INFERENCE
+
+Five pretrained models are used during inference, as listed in Table 7.3. The training of these models is described in Section 7.17.
+
+Table 7.3: Models Used for Inference
+
+  Task               | Model repository                             | Output                                 | Max tokens
+  -------------------|----------------------------------------------|----------------------------------------|-----------
+  Language detection | Favaz-07/language-detection-xlmr             | One of five languages                  | 96
+  Disaster filter    | Favaz-07/disaster-classifier-xlmr            | Probability that a post is disaster-related | 128
+  Sentiment          | akshataudaganve/xlmr-sentiment-disaster      | Negative and positive probabilities    | 128
+  Need detection     | Favaz-07/need-detection-xlmr                 | Independent probability for four needs | 128
+  Sentence embedding | l3cube-pune/indic-sentence-similarity-sbert  | 768-dimensional normalised vector      | Model default
+
+All four classifiers use the same wrapper, illustrated by the need-detection model in Algorithm 7.5. A model is loaded once, on first use, and remains in memory for later posts. Need detection is a multi-label task, so a sigmoid function is applied to each output, allowing a post to indicate several needs at once. The disaster and sentiment classifiers use a softmax function, and the language classifier selects the class with the highest score.
+
+Algorithm 7.5: Model Inference (Need Detection)
+
+  procedure NEED-MODEL(text)
+      if model is not loaded then
+          source <- local model folder if present, else Hugging Face Hub
+          load tokenizer and model from source
+          set model to evaluation mode
+      tokens <- tokenizer(text, max_length = 128, truncate, pad)
+      without gradient tracking do
+          logits <- model(tokens)
+      p <- sigmoid(logits)
+      needs <- {healthcare: p1, municipal: p2, tourism: p3, law: p4}
+      return needs, max(needs)
+
+The script tools/download_models.py stores each model in backend/models and verifies every weight file against its SHA-256 checksum, after which the backend can run without network access. If the deep-learning libraries are not installed, an offline backend replaces the prediction functions with keyword and hashing heuristics. This allows the rest of the pipeline to be developed and demonstrated on a machine without the models. Its outputs are not predictions from the trained models.
+
+
+7.8 INCREMENTAL CLUSTERING
+
+The ClusterManager class holds the live clusters in memory. Algorithm 7.6 applies the four joining conditions from Section 5.3.4 and selects the most similar eligible cluster.
+
+Algorithm 7.6: Incremental Cluster Assignment
+
+  Input : analysed record r, list of live clusters L
+  Output: the cluster containing r
+
+  procedure ASSIGN-TO-CLUSTER(r)
+      v <- normalise(IndicSBERT(r.text))
+      best <- none;  bestSim <- -1
+      for each cluster C in L do
+          sim <- dot(v, C.centroid)
+          if sim < 0.32 then continue
+          if |r.time - C.lastUpdated| > 48 hours then continue
+          if no department has need > 0.3 in both r and C then continue
+          if r and C both name places and share none then continue
+          if sim > bestSim then
+              best <- C;  bestSim <- sim
+      if best is none then
+          create a new cluster containing r and add it to L
+          return the new cluster
+      add r to best
+      best.centroid <- mean of all member embeddings
+      for each department d do
+          best.relevance[d] <- max(best.relevance[d], r.needs[d])
+      return best
+
+Place names are compared using a single spelling for each place, so that "Mysuru" and "Mysore" are treated as the same location. Clusters that have become similar over time can be merged through POST /clustering/recluster, which applies HDBSCAN [23] to the cluster centroids. This operation is run on demand and is not part of the automatic worker loop.
+
+Cluster state is saved each time a post joins a cluster. Each centroid is stored in a compact 32-bit binary format, and member embeddings are kept in the tweets collection, so that a large cluster cannot exceed MongoDB's 16 MB document limit. After every 100 posts, clusters older than the 48-hour window are marked inactive and their member embeddings are deleted, which limits the storage used by vectors. At start-up, clusters created with a different embedding model are ignored, so vectors from different models are never compared.
+
+
+7.9 CLUSTER SCORING
+
+Scoring is implemented in the scoring package using only explicit rules and formulas. Multilingual keyword lists cover urgency, severity, location, place names, infrastructure, time, forwarding language and hearsay in English, Hindi, Kannada, Tamil and Telugu. Except for place names, each list also contains romanised forms of the Indian-language terms.
+
+Before scoring, a cluster's posts are grouped into independent reports, as shown in Algorithm 7.7. A union-find structure is used so that copying is treated as transitive: if post A matches post B and post B matches post C, all three belong to one group.
+
+Algorithm 7.7: Grouping Copies into Independent Reports
+
+  procedure GROUP-REPORTS(members)
+      reports <- members, keeping one post for each origin_id
+      initialise a union-find structure over reports
+      for each pair of reports (a, b) do
+          if normalised text of a = normalised text of b
+                  or cosine(a.embedding, b.embedding) >= 0.92 then
+              UNION(a, b)
+      return reports, the groups of the union-find structure
+
+Algorithm 7.8 calculates the final scores for a cluster. Every score uses the weighted-sum helper described in Section 5.3.1, so a missing input is skipped and the remaining weights are renormalised.
+
+Algorithm 7.8: Cluster Scoring
+
+  Input : cluster members, simulation clock now
+  Output: priority, band, fake score, likely-fake flag
+
+  procedure SCORE-CLUSTER(members, now)
+      reports, groups <- GROUP-REPORTS(members)
+      for each post p in members do
+          compute severity, actionability, text quality, specificity,
+              content risk and model confidence of p
+          if |groups| <= 1 then consistency(p) <- 0.5
+          else consistency(p) <- scaled similarity of p to the centroid
+          credibility(p) <- WEIGHTED-SUM(terms of p)
+      independent <- first post of each group
+      S <- mean of the three highest severity values in members
+      A <- mean of the three highest actionability values in members
+      Cr <- mean credibility over independent
+      R <- mean content risk over reports
+      Co <- WEIGHTED-SUM(report volume, language diversity)
+      Am <- WEIGHTED-SUM(duplicate ratio, copy burst, forward ratio)
+      Re <- 0.5 ^ (hours since the latest post / 6)
+      priority <- WEIGHTED-SUM(S, A, Co, Cr, Re)
+      fake <- WEIGHTED-SUM(1 - Cr, R, Am)
+      band <- first of Critical, High, Medium, Low whose minimum is met
+      return priority, band, fake, (fake >= 0.60)
+
+
+7.10 SUMMARY, EVIDENCE AND PRIVACY
+
+The summary is assembled in two steps. Language-neutral facts such as the event type, location, impact, number of independent reports and main needs are first extracted from the cluster. The same facts are then written into a sentence template for each of the five languages. A fact that is not available is omitted from the sentence.
+
+Evidence posts are chosen by Algorithm 7.9, which favours high-scoring posts while keeping the selection varied across languages. Each selected post is stored with a short reason, such as "closest to event" or "location + number", which is displayed to the reviewer. Evidence posts are shown in their original language.
+
+Algorithm 7.9: Evidence Selection
+
+  procedure SELECT-EVIDENCE(members, groups)
+      candidates <- earliest post of each group
+      remove posts with forwarding language from candidates,
+          unless this would remove every post
+      rank candidates by descending EvidenceScore
+      k <- min(5, size(candidates))
+      selected <- empty list
+      while size(selected) < k do
+          remaining <- ranked candidates not yet selected
+          choice <- first post in remaining whose language is not yet selected
+          if no such post exists then
+              choice <- first post whose language appears fewer than 2 times
+          if no such post exists then
+              choice <- first post in remaining
+          add choice to selected with the reason for its selection
+      return selected
+
+Privacy controls are applied before data is written to the database:
+
+  - Author fields such as usernames and user identifiers are removed as soon as analysis begins. They are replaced by a salted SHA-256 reference, which can distinguish authors but cannot be reversed to reveal them.
+  - Digit sequences containing at least seven digits are replaced by [PHONE_REDACTED]. Shorter numbers, such as casualty counts, are retained.
+  - Metadata fields containing an address or location are replaced by [ADDRESS_REDACTED].
+
+
+7.11 REVIEW, ROUTING AND ESCALATION
+
+A reviewer's decision is processed by Algorithm 7.10. Every decision is stored as a verdict together with a frozen copy of the scores at that moment, so later rescoring does not alter the record used for evaluation. Ticket creation is idempotent: repeating an approval does not create a second ticket, and a unique database index on the situation and department provides a further safeguard.
+
+Algorithm 7.10: Reviewer Decision and Ticket Creation
+
+  procedure DECIDE(s, decision, note)
+      if decision = approve then
+          OPEN-TICKETS(s, verified = true, flag = none)
+      else if decision = fake then
+          OPEN-TICKETS(s, verified = false, flag = "fake")
+      else                                        // reject
+          cancel all open tickets of s
+      update the status of s and record the decision time
+      store a verdict with a snapshot of the scores of s
+
+  procedure OPEN-TICKETS(s, verified, flag)
+      departments <- departments of all needs above their thresholds
+      if departments is empty then
+          departments <- {department assigned to s}
+      for each department d in departments do
+          t <- ticket for (s, d)
+          if t does not exist then
+              create a ticket for d with status routed
+          else
+              if t is cancelled then reopen t with status routed
+              update the verified and flag fields of t
+
+Algorithm 7.11 runs every 10 seconds. Each High or Critical situation receives a review deadline when it is created. If its band later rises, the earlier deadline is retained, and if the band falls to Medium or Low, the deadline is removed. Before opening tickets, the algorithm changes the status only if the situation is still pending. If a reviewer has decided in the meantime, the update has no effect and no ticket is opened.
+
+Algorithm 7.11: Automatic Escalation
+
+  procedure ESCALATE-OVERDUE()
+      overdue <- situations with status pending, a deadline that has
+                 passed, and likely_fake not set
+      for each situation s in overdue do
+          claimed <- update s to auto_routed only if s is still pending
+          if claimed then
+              OPEN-TICKETS(s, verified = false, flag = none)
+
+Department officers then move each ticket through its lifecycle. The API accepts only the transitions shown in Figure 5.8 and returns HTTP 409 for any other request, such as acknowledging a ticket that has already been resolved.
+
+
+7.12 ANALYTICS AND DAILY REPORTS
+
+Analytics are written as pure functions that receive stored documents and return results without accessing the database, which makes each figure straightforward to test. Table 7.4 summarises how they are calculated.
+
+Table 7.4: Analytics Implementation
+
+  Output               | Calculation
+  ---------------------|------------------------------------------------------------------------------------
+  Response metrics     | Median time to acknowledge and resolve tickets, by band and by department
+  Overdue tickets      | Unacknowledged beyond 15 min (Critical), 60 min (High), 240 min (Medium) or 1,440 min (Low)
+  Situation trend      | change = (last hour - previous hour) / max(1, previous hour); Growing if >= +0.2, Fading if <= -0.2, otherwise Stable
+  Hourly volume        | Posts that passed both filters in each of the last 24 hours
+  Department heatmap   | Reports per department for each hour of the day over the last 7 days
+  Language heatmap     | Mean need probability for each need and language over the last 7 days
+  Daily report         | Situations, department activity and review outcomes for one calendar day (IST)
+
+The worker stores the previous day's report automatically once that day has ended, and a stored report can be rebuilt through the API.
+
+
+7.13 FRONTEND IMPLEMENTATION
+
+The frontend is a single-page React application with client-side routing. All network calls are made through src/api/client.js, so pages do not contain endpoint details. Table 7.5 describes the main files.
+
+Table 7.5: Frontend Components
+
+  File                         | Implementation
+  -----------------------------|--------------------------------------------------------------------------------
+  pages/ReviewPage.jsx         | Review queue ordered by band and priority, situation details, evidence and reviewer notes
+  pages/DashboardPage.jsx      | Summary tiles, department ticket queues and analytics panels
+  pages/ReportPage.jsx         | Report list and a daily report that can be printed to PDF from the browser
+  components/AnalyticsPanels.jsx | Live board, trends, hourly volume, heatmaps and response metrics
+  components/Charts.jsx        | Sparklines, bar charts, heatmaps and meters drawn directly in SVG and HTML
+  components/FilteredPanel.jsx | Posts removed by the pipeline, with the reason for each removal
+  departments.js               | The fixed colour assigned to each department
+
+The review console and dashboard refresh their data every 10 seconds, so new situations appear without reloading the page. Reviewers can work from the keyboard: T approves a situation, F marks it as fake and the right arrow key skips it. Figures 7.1, 7.2 and 7.3 show the review console, the routing dashboard and the daily report. A skipped situation moves to the end of that reviewer's queue, and no decision is stored. The charts are built directly with SVG and HTML, so no charting library is required.
+
+  [Figure 7.1: Review Console — screenshot of the / page]
+  [Figure 7.2: Routing Dashboard — screenshot of the /dashboard page]
+  [Figure 7.3: Daily Situation Report — screenshot of the /reports/:day page]
+
+
+7.14 SIMULATOR AND DEMONSTRATION DATA
+
+The prototype does not connect to a live social-media API. Instead, tools/simulator/csv_producer.py reads a CSV file and sends each row to the ingestion endpoint at a configurable interval, reproducing the arrival of a stream of posts. The simulator can use fixed or random delays, retain each row's original timestamp, limit the number of posts and repeat the file continuously. The sample file, ingestion.csv, contains 136 posts.
+
+The script tools/demo_day/seed_previous_day.py prepares a complete past day for demonstration. It sends 46 posts written for the demonstration through the actual pipeline with the clock set to that day. Reviewer and department actions are scripted, so that the dashboard and daily report show approvals, an automatic escalation, a flagged rumour and tickets at different stages.
+
+
+7.15 AUTOMATED TESTING
+
+The backend has an automated test suite written with pytest. Table 7.6 summarises it. In the most recent run, all 165 test cases passed. MongoDB is replaced by an in-memory mock, and model predictions are replaced by fixed test values, so the tests can run quickly and repeatably on any machine. They therefore verify the system's logic, not the accuracy of the models, which is evaluated in Chapter 8.
+
+Table 7.6: Automated Test Suite
+
+  Test module               | Test cases | Behaviour verified
+  --------------------------|------------|----------------------------------------------------------------------
+  test_analysis_pipeline.py | 22         | Language detection, disaster filter, sentiment, needs and the combine step
+  test_language_labels.py   | 2          | Mapping of model output labels to language codes
+  test_pipeline.py          | 8          | Ingestion, cleaning, repost detection, evidence extraction and masking
+  test_clustering.py        | 5          | Joining conditions, time window and place matching
+  test_cluster_store.py     | 7          | Restoring clusters after a restart and removing stale embeddings
+  test_scoring.py           | 43         | Scoring formulas and multilingual scoring behaviour
+  test_summary_evidence.py  | 26         | Multilingual summaries and evidence selection
+  test_storage.py           | 15         | Rescoring, verdicts, ticket rules, privacy and unique indexes
+  test_escalation.py        | 12         | Review deadlines, automatic routing and likely-fake exclusion
+  test_analytics.py         | 16         | Response metrics, trends, heatmaps and daily reports
+  test_end_to_end.py        | 9          | Complete flow from queued post to scored, reviewable situation
+  Total                     | 165        |
+
+
+7.16 RUNNING THE SYSTEM
+
+The system is started with the following commands, with MongoDB already running:
+
+  # Backend (http://localhost:8000)
+  cd backend
+  pip install -r requirements.txt
+  python tools/download_models.py
+  uvicorn app.main:app --port 8000
+
+  # Frontend (http://localhost:5173)
+  cd frontend
+  npm install
+  npm run dev
+
+  # Stream the sample posts
+  cd backend
+  python tools/simulator/csv_producer.py
+
+  # Run the automated tests
+  cd backend
+  python -m pytest
+
+
+7.17 DATA PREPARATION AND MODEL TRAINING
+
+The four classifiers in Table 7.3 were fine-tuned from xlm-roberta-base [16] in Kaggle GPU notebooks, separately from the running system. IndicSBERT [18] was used as published and was not trained. Two datasets were prepared. The Disaster Tweets set contains 11,095 cleaned English tweets from Kaggle and 3,000 IndicTrans2 [19] translations in each of Hindi, Kannada, Tamil and Telugu, giving 23,095 rows. The multilingual tweet set contains 177,707 training rows and 18,540 test rows, drawn from Sentiment140 [21] for English, NLLB-200 [20] translations of it for Hindi and Telugu, and DravidianCodeMix [22] for Kannada and Tamil. Table 7.7 gives the final split sizes, with training counts shown after balancing.
+
+Table 7.7: Training Data
+
+  Model              | Dataset                | Train   | Validation | Test
+  -------------------|------------------------|---------|------------|-------
+  Disaster filter    | Disaster Tweets set    | 40,616  | 1,809      | 1,830
+  Need detection     | Disaster Tweets set    | 38,180  | 2,329      | 2,342
+  Language detection | Multilingual tweet set | 95,000  | 5,000      | 18,540
+  Sentiment          | Multilingual tweet set | 159,936 | 17,771     | 18,540
+
+Algorithm 7.12 shows the cleaning procedure as implemented for the SentiMix code-mixed corpus, which was used in the earlier Phase 2 experiments. The two final datasets followed the same main steps. In addition, disaster tweets were converted to lower case and special characters were removed, while the sentiment data was Unicode-normalised, repeated characters were reduced, and missing, very short and duplicate rows were dropped.
+
+Algorithm 7.12: Social Media Text Cleaning
+
+  procedure CLEAN-TEXT(t)
+      t <- decode HTML entities and remove zero-width characters
+      remove a leading "RT"
+      remove URLs, broken t.co fragments and @mentions
+      replace #word with word
+      shorten runs of !, ? or . to two characters
+      collapse repeated whitespace and remove trailing dots
+      replace each emoji with its English name    // training split only
+      return t                                    // empty rows are discarded
+
+A translated tweet carries the same content as its English source, so a random split could place the two versions in different sets and inflate the test scores. Algorithm 7.13 prevents this by splitting on the identity of the original tweet. Department labels were derived from keywords in the English tweets, and each translation inherits the labels of its source.
+
+Algorithm 7.13: Leakage-Safe Split and Language Balancing
+
+  Input : English rows E, translated rows T
+  Output: training, validation and test sets
+
+  procedure PREPARE-DATA(E, T)
+      assign a tweet_id to each row of E
+      give each row of T the tweet_id and labels of its English source
+      split the tweet_ids 80/10/10, stratified by label
+      place every row in the split that holds its tweet_id
+      assert that no tweet_id occurs in two splits
+      add two extra copies of each non-English training row
+      return train, validation, test    // validation and test stay unbalanced
+
+For need detection, 32 hand-written English examples were each added five times, and rows labelled tourism, the rarest need, were tripled. For language detection, 40 duplicate rows and 59 rows that also appeared in the test file were removed from the training data. Each language was then resampled to 20,000 rows, and 5% of the result was held out for validation. Sentiment used a 90/10 split of the training file, stratified by language and label, without this resampling or row removal. Algorithm 7.14 shows the training procedure, and Table 7.8 lists the settings for each model.
+
+Algorithm 7.14: Model Training and Evaluation
+
+  procedure TRAIN-MODEL(train, validation, test, config)
+      model <- xlm-roberta-base with a new output layer for the task
+      tokens <- tokenizer(text, truncate and pad to config.maxTokens)
+      for epoch <- 1 to config.epochs do
+          for each batch in train do
+              loss <- config.loss(model(batch), batch.labels)
+              update the weights with AdamW
+          score <- evaluate the model on validation
+          if score is the best so far then save a checkpoint
+      restore the best checkpoint
+      if the task is need detection then
+          for each label do
+              threshold <- value from 0.20 to 0.80 (step 0.05) with the best validation F1
+      report the metrics on test
+      save the model and tokenizer
+
+Table 7.8: Training Configuration and Test Results
+
+  Model     | Max tokens | Epochs                  | Batch per GPU | Loss                                   | Test result
+  ----------|------------|-------------------------|---------------|----------------------------------------|--------------------------------
+  Language  | 96         | 2                       | 32            | Cross-entropy                          | Accuracy 99.24%, macro F1 0.983
+  Disaster  | 128        | 3                       | 16            | Class-weighted cross-entropy           | Accuracy 89.02%, F1 0.710
+  Sentiment | 128        | Up to 6, early stopping | 16            | Cross-entropy                          | Accuracy 82.75%, F1 0.852
+  Need      | 128        | 3                       | 32            | Binary cross-entropy, pos_weight <= 10 | Exact match 92.66%, macro F1 0.67
+
+All models used a learning rate of 2e-5, with warm-up over the first 10% of training steps. For sentiment, MuRIL [17] was trained in the same way, and XLM-R was selected for its higher test F1 (0.852 against 0.849). The need thresholds chosen on the validation set (healthcare 0.65, municipal 0.80, tourism 0.75, law 0.65) are the values used by the backend. Per-language disaster thresholds were also explored, ranging from 0.07 for English to above 0.99 for the other languages. These values were not adopted, and the backend applies a single threshold of 0.5.
+
+
+SUMMARY
+This chapter described the implementation of the system. A FastAPI backend processes each post through an asynchronous, fault-tolerant pipeline covering cleaning, language detection, model inference, incremental clustering, scoring, summarisation and evidence selection. Human review, ticket routing and automatic escalation were implemented with safeguards against duplicate tickets and conflicting decisions, and a React frontend presents the results to reviewers and departments. The classifiers were trained offline on multilingual data using leakage-safe splits. An automated suite of 165 test cases verifies the system's logic. The performance of the models and the complete system is evaluated in the next chapter.
+
+
+
+
+================================================================================
+CHAPTER 8
+RESULTS AND DISCUSSION
+(Target length: 9-10 pages including tables)
+================================================================================
+
+This chapter presents the results obtained for the trained models, the clustering module and the scoring formulas. The results are then compared with relevant published work to identify what the system adds and where it still falls short. No existing system performs the complete task addressed by this project, so each module is compared with work on the same task, and the system as a whole is compared by capability.
+
+
+8.1 EVALUATION SETUP AND METRICS
+
+Each classifier was evaluated once on a held-out test set that was not used for training, balancing or threshold selection. Test sets kept their natural class and language distribution, and every result was also reported per language so that strong English performance could not hide weak performance elsewhere. The scoring formulas were evaluated on synthetic situations, because no human-labelled set of real situations was available. Table 8.1 defines the metrics used.
+
+Table 8.1: Evaluation Metrics
+
+  Metric                  | Meaning                                                       | Used for
+  ------------------------|---------------------------------------------------------------|---------------------------
+  Accuracy                | Share of all predictions that are correct                     | All classifiers
+  Precision               | Share of predicted positives that are truly positive          | All classifiers, fake score
+  Recall                  | Share of true positives that are found                        | All classifiers, fake score
+  F1 score                | Harmonic mean of precision and recall                         | Disaster, sentiment, fake score
+  Macro-F1                | Unweighted mean of the F1 score of each class                 | Language, need detection
+  Micro-F1                | F1 calculated from the pooled counts of all labels            | Need detection
+  Exact-match accuracy    | Share of posts with every label predicted correctly           | Need detection
+  Confusion matrix        | Counts of actual classes against predicted classes            | Language, sentiment, priority
+  Exact band agreement    | Share of situations placed in the expected priority band      | Priority score
+  Within-one-band         | Share of situations no more than one band from the expected   | Priority score
+  Spearman correlation    | Agreement between priority order and expected urgency order   | Priority score
+  False alarms            | Genuine situations wrongly flagged as likely fake             | Fake score
+  Processing overhead     | Pipeline time per post, in milliseconds                       | System performance
+
+
+8.2 MODEL RESULTS
+
+Table 8.2 summarises the held-out results of the four classifiers. MuRIL is included because it was trained under the same settings as the XLM-R sentiment model.
+
+Table 8.2: Overall Test Results
+
+  Task               | Model | Test posts | Accuracy       | Precision  | Recall     | F1
+  -------------------|-------|------------|----------------|------------|------------|------------
+  Language detection | XLM-R | 18,540     | 99.24%         | 0.979 macro| 0.988 macro| 0.983 macro
+  Disaster filter    | XLM-R | 1,830      | 89.02%         | 0.687      | 0.734      | 0.710
+  Sentiment          | XLM-R | 18,540     | 82.75%         | 0.824      | 0.883      | 0.852
+  Sentiment baseline | MuRIL | 18,540     | 82.32%         | 0.821      | 0.879      | 0.849
+  Need detection     | XLM-R | 2,342      | 92.66% (exact) | 0.70 micro | 0.78 micro | 0.73 micro
+
+Table 8.3: Per-Language Test Results
+
+  Language | Language ID      | Disaster filter  | Sentiment        | Need detection
+           | Accuracy | F1    | Accuracy | F1    | Accuracy | F1    | Exact match | Macro-F1
+  ---------|----------|-------|----------|-------|----------|-------|-------------|---------
+  English  | 99.20%   | 0.991 | 89.46%   | 0.733 | 83.86%   | 0.847 | 98.65%      | 0.919
+  Hindi    | 99.56%   | 0.997 | 88.89%   | 0.688 | 82.12%   | 0.830 | 90.58%      | 0.553
+  Kannada  | 96.98%   | 0.946 | 87.78%   | 0.667 | 82.09%   | 0.880 | 87.01%      | 0.376
+  Tamil    | 98.49%   | 0.985 | 86.11%   | 0.615 | 85.01%   | 0.912 | 87.01%      | 0.421
+  Telugu   | 99.64%   | 0.998 | 90.56%   | 0.712 | 80.94%   | 0.818 | 84.42%      | 0.415
+
+Table 8.3 gives the results for each language.
+
+Language detection. The classifier was the strongest model. Kannada was the weakest language, which is consistent with it having the fewest original training posts. The 99.24% figure measures the XLM-R classifier on all test posts. Of these posts, 58.0% are in a native script, which is the easier case.
+
+Disaster filter. Accuracy stayed between 86.11% and 90.56% in every language, showing that the leakage-safe split and language balancing produced a consistent model. The F1 score of 0.710 is the more informative result, because about 81% of the dataset is non-disaster, so a model that always predicted that class would already reach about 81% accuracy. The XLM-R model scored 1.5 percentage points below the earlier English-only BERTweet [24] baseline (90.49%), which was accepted because BERTweet cannot process Indic scripts.
+
+Sentiment. XLM-R was selected over MuRIL by a small margin in accuracy and F1. Its per-language F1 ranged from 0.818 to 0.912. Tamil and Kannada scored highest on F1, but they also have the fewest test posts, so their figures are less certain than those of the other languages.
+
+Need detection. Table 8.4 shows the result for each department. The exact-match accuracy of 92.66% overstates performance, because at least 86.6% of test posts have no need label, and a model that predicted no need for every post would therefore reach that level. Macro-F1 is the fairer measure. It falls from 0.919 for English to between 0.376 and 0.553 for the other languages, which makes this the weakest result in the system.
+
+Table 8.4: Need Detection Results by Department
+
+  Department | Precision | Recall | F1   | Positive test labels
+  -----------|-----------|--------|------|---------------------
+  Healthcare | 0.71      | 0.72   | 0.71 | 71
+  Municipal  | 0.69      | 0.79   | 0.74 | 169
+  Tourism    | 0.38      | 0.40   | 0.39 | 15
+  Law        | 0.76      | 0.91   | 0.83 | 58
+  Micro avg. | 0.70      | 0.78   | 0.73 | 313
+  Macro avg. | 0.63      | 0.71   | 0.67 | 313
+
+Checks on hand-written sentences showed the same weakness. At the deployed threshold of 0.5, the disaster filter classified three of six sentences correctly. Clear Hindi and Kannada flood messages asking for help each scored 0.001, and a harmless Hindi weather sentence scored 0.972. Need detection handled two of five sentences correctly. These samples are small, but they indicate that the models trained on machine-translated text do not yet generalise reliably to natural Indic posts.
+
+
+8.3 CLUSTERING AND SCORING RESULTS
+
+Clustering. The incremental clustering module passed all six functional scenarios: merging posts about one event, separating unrelated events, respecting the 48-hour window, merging English and Tamil reports of one flood, holding back small clusters, and running the HDBSCAN correction step. During calibration, same-event pairs had a mean cosine similarity of 0.51 and the different-event pair scored 0.08. Testing also exposed a department-overlap rule that wrongly blocked a flood report describing health effects, and the rule was corrected. These scenarios confirm correct behaviour, but clustering quality was not measured on a labelled dataset.
+
+Priority score. The formula was evaluated on 52 synthetic situations whose expected bands were fixed in advance by a written rubric, with 30 used for tuning and 22 held out. Table 8.5 gives the held-out result. The final formula placed 54.5% of held-out situations in the exact band and all of them within one band. The Spearman correlation between priority and expected urgency across all 52 situations was 0.85, so the formula orders situations well even when a band boundary is missed. A search over weight combinations did not produce a more reliable formula: the best weights on the tuning set reached only 50% on the held-out set, and five-fold cross-validation averaged 54% for the final weights against 48% for tuned weights. Moving 0.05 of weight between any two terms kept agreement between 50% and 56%. Two of the four Critical situations were placed in the High band, so the Critical boundary remains conservative.
+
+Table 8.5: Priority Band Confusion Matrix (Held-Out Set, n = 22)
+
+  Expected band | Predicted Critical | Predicted High | Predicted Medium | Predicted Low
+  --------------|--------------------|----------------|------------------|--------------
+  Critical      | 2                  | 2              | 0                | 0
+  High          | 0                  | 5              | 3                | 0
+  Medium        | 0                  | 2              | 4                | 0
+  Low           | 0                  | 0              | 3                | 1
+
+Fake score. The formula was evaluated on 83 synthetic situations: 62 genuine and 21 rumours. Genuine situations scored between 0.02 and 0.30, so no false alarm was raised at any threshold in Table 8.6. However, the highest rumour scored 0.59, just below the deployed flag of 0.60, so no rumour was flagged at that setting. A threshold of 0.40 would have caught 52% of rumours with no false alarms. Copy-paste chains and translated forwards were separated clearly, while hearsay and calmly worded rumours scored 0.14 to 0.28, the same range as genuine reports, because they lack the copying signals that the formula relies on.
+
+Table 8.6: Fake Score Threshold Analysis (62 Genuine, 21 Rumours)
+
+  Threshold     | Rumours caught | False alarms | Precision | Recall | F1
+  --------------|----------------|--------------|-----------|--------|-----
+  0.40          | 11             | 0            | 100%      | 52%    | 0.69
+  0.45          | 11             | 0            | 100%      | 52%    | 0.69
+  0.50          | 7              | 0            | 100%      | 33%    | 0.50
+  0.55          | 5              | 0            | 100%      | 24%    | 0.38
+  0.60 (in use) | 0              | 0            | -         | 0%     | 0.00
+
+System testing. All 165 automated test cases passed. In the model-free test configuration, processing 300 posts added a pipeline overhead of 3.1 ms per post, and read APIs had a median response time of 9.6 ms. These timings exclude model inference.
+
+
+8.4 DISCUSSION
+
+The closest published studies each address a single stage of crisis monitoring and use different datasets, languages and labels, so their results provide context rather than a direct ranking. For disaster detection, Algiriyage et al. [5] report an F1 score of about 0.92 with a Bi-LSTM on 192K English tweets, and PIDMUS [10] reaches 81.36% accuracy in English and 86.75% in Turkish. The disaster filter in this project achieved 86.11% to 90.56% accuracy across five languages, with F1 scores of 0.615 to 0.733. For need detection, Ray Chowdhury et al. [7] report F1 scores of 79.84 to 87.44 on mainly English and European tweets. This project's micro-F1 of 0.73 is lower, which is the cost of covering five languages with one model. IndicLID [9] reaches 98.55% accuracy on native script but only 80.40% on romanised text, confirming that romanised text is the harder case for language detection. In clustering and prioritisation, Ray et al. [13] use a similar threshold-based incremental method, CURD [14] classifies urgency with an F1 score of 0.88, and EventHunter [15] ranks events with a weighted score assessed only qualitatively. The priority score in this project was instead tested on held-out situations and for weight sensitivity.
+
+The main gap in this work is integration. Indian-language studies such as Das et al. [8] stop at classification, and both the systems that cluster or rank posts [13], [14], [15] and multi-label crisis classifiers such as CrisisSense-LLM [12] work mainly in English. None of the surveyed works takes a post written in an Indian language through to a scored situation and a reviewed ticket for a department, and this is the gap the project fills.
+
+The system also has clear limitations. Need detection is weak outside English, with macro-F1 between 0.376 and 0.553, so Indic posts may not reach the correct department. The Indic training data is machine-translated, and hand-written Hindi and Kannada flood messages were missed. This agrees with Rahul and Adebayo [11], who found that XLM-R accuracy fell from 99.7% to 42.5% under harder test conditions. Romanised and code-mixed posts were not evaluated separately. The fake-score threshold of 0.60 raised no false alarms but also caught none of the 21 synthetic rumours. Both scoring formulas were validated only on synthetic situations, and clustering only through six scenarios. Finally, the system replays a CSV file instead of reading live social media, so its performance under real traffic is untested.
+
+
+SUMMARY
+The language detector reached 99.24% accuracy, the disaster filter 89.02% with an F1 score of 0.710, the sentiment model 82.75% with an F1 score of 0.852, and need detection a micro-F1 of 0.73. The priority formula placed every held-out synthetic situation within one band of its expected level. Compared with published work, individual modules do not exceed the best single-task English systems, but no surveyed system combines Indian-language analysis, situation building, scoring and reviewed department routing. The main remaining weaknesses are non-English need detection, reliance on translated training data and the untuned fake-score threshold. These motivate the future work described in the next chapter.
+
+
+
+
+================================================================================
+CHAPTER 9
+CONCLUSION AND FUTURE WORK
+(Target length: 2-3 pages)
+================================================================================
+
+9.1 CONCLUSION
+
+This project set out to turn multilingual social media posts about a crisis into verified, prioritised work for the government departments that must respond. The resulting system accepts posts in English, Hindi, Kannada, Tamil and Telugu, including romanised text, and processes each post through cleaning, repost detection, language detection, disaster filtering, sentiment analysis and multi-label need detection. Related posts are grouped into situations using multilingual IndicSBERT embeddings, so that reports of one event in different languages are treated as one situation rather than separate alerts.
+
+Each situation receives a priority score and a fake score calculated from explainable formulas. Every term in these formulas is visible to the reviewer, so the reason for a Critical band or a misinformation warning can be checked. A template-based summary is produced in all five languages, and the most representative posts are attached as evidence after personal details are masked. Human reviewers confirm each situation before routing, and a situation that concerns several departments opens a separate ticket for each one. Critical and High situations are routed automatically if no reviewer acts within the configured time, so urgent reports are not delayed by the review queue. Departments then acknowledge and resolve tickets, and the analytics dashboard and daily reports summarise response times, trends and workload.
+
+The four classifiers achieved 99.24% accuracy for language detection, 89.02% accuracy for the disaster filter, 82.75% accuracy for sentiment and a micro-F1 of 0.73 for need detection. The priority formula placed every held-out synthetic situation within one band of its expected level, with a rank correlation of 0.85. All 165 automated tests passed. These results show that a single pipeline can connect Indian-language posts to departmental action, which no surveyed work attempted. The results also show where the system is weakest: need detection outside English, models trained on machine-translated text, and a fake-score threshold that has not yet been tuned on real data.
+
+Table 9.1 summarises the outcome of each project objective.
+
+Table 9.1: Project Objectives and Outcomes
+
+  Objective                                         | Outcome
+  --------------------------------------------------|------------------------------------------------------------
+  Multilingual analysis in five languages           | Achieved, including romanised text and code-mixing flags
+  Sentiment and need detection                      | Achieved; need detection is weaker outside English
+  Fake-news and priority scoring                    | Achieved with explainable formulas; fake threshold untuned
+  Situation summaries and evidence                  | Achieved in all five languages, with privacy masking
+  Human-validated departmental routing              | Achieved, with multi-department tickets and auto-escalation
+  Dashboard monitoring and reports                  | Achieved: live board, trends, heatmaps and daily reports
+  Real-time processing of live social media         | Partly achieved; posts are streamed from a CSV simulator
+
+
+9.2 FUTURE WORK
+
+The following extensions would address the limitations identified in Chapter 8 and move the system closer to deployment.
+
+1. Learning from reviewer decisions. Every verdict is stored with a snapshot of the scores at the time of review. Once enough real decisions are collected, they can be used to re-tune the priority weights, the band cut-offs and the fake-score threshold. The synthetic evaluation suggests that a fake threshold near 0.40 would catch about half of the rumours without false alarms, but this should be confirmed on real data.
+
+2. Native and code-mixed training data. The disaster and need models should be retrained on posts written natively in Indian languages, including romanised and code-mixed text, instead of machine translations. Need detection outside English should be the first priority, and romanised posts should be evaluated separately.
+
+3. Per-language calibration. The system already supports per-language calibration of model confidence and per-language disaster thresholds, but neither has been fitted. Fitting them on a validation set would make scores comparable across languages.
+
+4. Translation of evidence. A hook exists for translating non-English evidence into English with IndicTrans2, but it is not yet connected. Completing it would let reviewers who do not read every supported language verify the evidence directly.
+
+5. Live data sources. The CSV simulator should be replaced by adapters for social media APIs, and the in-memory queue by a persistent message broker so that queued posts survive a restart.
+
+6. Department access. Each department should have its own login and queue, so that officers see only their tickets and every action is linked to an accountable user.
+
+7. Stronger evaluation. Clustering should be measured with ARI and AMI on a labelled event dataset, the HDBSCAN correction step should run on a schedule, and the models should be tested on adversarial and real crisis posts in addition to held-out benchmark data.
+
+8. Wider coverage. Location mapping on the heatmap and support for further Indian languages would extend the system to more regions and users.
+
+In summary, the project delivers a working, tested and explainable prototype that links multilingual public reports to departmental response. Its main value lies in this integration, and the future work above is aimed at making each stage reliable enough for use in a real crisis.
+
+
+
+
+================================================================================
+REFERENCES
+================================================================================
+
+[1] G. Bandarupalli, "Enhancing sentiment analysis in multilingual social media data using transformer-based NLP models: A synthetic computational study," TechRxiv preprint, Apr. 2025, doi: 10.36227/techrxiv.174440282.23013172v1.
+[2] P. Rakshit, P. Sarkar, and S. Roy, "Hybrid deep learning approach for sentiment analysis on Twitter data," Multimedia Tools and Applications, vol. 84, pp. 15272–15293, 2025, doi: 10.1007/s11042-024-19555-4.
+[3] A. Kumar, A. Pandey, S. Ahlawat, and Y. Prasad, "On enhancing code-mixed sentiment and emotion classification using FNet and FastFormer," in Proc. 17th Int. Conf. Agents and Artificial Intelligence (ICAART), vol. 3, 2025, pp. 670–678, doi: 10.5220/0013173600003890.
+[4] B. Chen, W. Guo, Q. Liu, and K. Tao, "Feature aggregation in zero-shot cross-lingual transfer using multilingual BERT," in Proc. 26th Int. Conf. Pattern Recognition (ICPR), 2022, arXiv:2205.08497.
+[5] N. Algiriyage, R. Sampath, R. Prasanna, K. Stock, E. Hudson-Doyle, and D. Johnston, "Identifying disaster-related tweets: A large-scale detection model comparison," in Proc. 18th Int. Conf. Inf. Syst. Crisis Response Manage. (ISCRAM), 2021, pp. 731–743.
+[6] B. N. Chinta, G. S. Sadvik, A. S. Venkat, K. Sravani, and M. Radha, "Real-time crisis detection on social media using NLP," in Proc. Int. Conf. Computational Intelligence, Jul. 2025.
+[7] J. Ray Chowdhury, C. Caragea, and D. Caragea, "Cross-lingual disaster-related multi-label tweet classification with manifold mixup," in Proc. 58th Annu. Meeting Assoc. Comput. Linguistics: Student Res. Workshop, 2020, pp. 292–298.
+[8] K. Das, D. Datta, M. Basu, and S. Ghosh, "Humanitarian classification of crisis-related microblogs in Bengali: A comparison of multilingual pre-trained language models," Int. J. Disaster Risk Reduction, 2025, doi: 10.1016/j.ijdrr.2025.105673.
+[9] Y. Madhani, M. M. Khapra, and A. Kunchukuttan, "Bhasha-Abhijnaanam: Native-script and romanized language identification for 22 Indic languages," in Proc. 61st Annu. Meeting Assoc. Comput. Linguistics, 2023.
+[10] K. Ayturan, F. Hardalac, H. Akmal, E. Yanar, and M. Kocak, "PIDMUS: A pipeline for identifying disaster tweets on Twitter with multilingual support using TF-IDF and ensemble learning model," Gazi Univ. J. Sci. Part C: Des. Technol., vol. 14, no. 2, pp. 966–984, 2026, doi: 10.29109/gujsc.1941386.
+[11] C. Rahul and K. Adebayo, "Beyond benchmark accuracy: Robustness evaluation of Hinglish sentiment models," in Proc. 6th Workshop Speech, Vision, Lang. Technol. Dravidian Lang., 2026, pp. 6–13, doi: 10.18653/v1/2026.dravidianlangtech-1.2.
+[12] K. Yin, B. Li, C. Liu, A. Mostafavi, and X. Hu, "CrisisSense-LLM: Instruction fine-tuned large language model for multi-label social media text classification in disaster informatics," arXiv:2406.15477, 2024.
+[13] M. Ray, Q. Wang, F. Mélanie-Becquet, T. Poibeau, and B. Mazoyer, "An incremental clustering baseline for event detection on Twitter," in Proc. Workshop Future Directions in Event Detection (FuturED), 2024.
+[14] A. Adesokan and S. Madria, "CURD: Context-aware relevance and urgency determination," in Proc. 36th Int. Conf. Scientific and Statistical Database Management (SSDBM), 2024, pp. 4:1–4:12.
+[15] Y. Ech-Chammakhy, A. Motii, A. Rabii, and J. Chbili, "EventHunter: Dynamic clustering and ranking of security events from hacker forum discussions," arXiv:2507.09762, 2025.
+[16] A. Conneau et al., "Unsupervised cross-lingual representation learning at scale," in Proc. 58th Annu. Meeting Assoc. Comput. Linguistics, 2020, pp. 8440–8451.
+[17] S. Khanuja et al., "MuRIL: Multilingual representations for Indian languages," arXiv:2103.10730, 2021.
+[18] S. Deode, J. Gadre, A. Kajale, A. Joshi, and R. Joshi, "L3Cube-IndicSBERT: A simple approach for learning cross-lingual sentence representations using multilingual BERT," in Proc. 37th Pacific Asia Conf. Language, Information and Computation (PACLIC), 2023, pp. 154–163.
+[19] J. Gala et al., "IndicTrans2: Towards high-quality and accessible machine translation models for all 22 scheduled languages of India," Trans. Machine Learning Research, 2023.
+-[20] NLLB Team et al., "No language left behind: Scaling human-centered machine translation," arXiv:2207.04672, 2022.
+[21] A. Go, R. Bhayani, and L. Huang, "Twitter sentiment classification using distant supervision," CS224N Project Report, Stanford Univ., 2009.
+[22] B. R. Chakravarthi et al., "DravidianCodeMix: Sentiment analysis and offensive language identification dataset for Dravidian languages in code-mixed text," Language Resources and Evaluation, vol. 56, pp. 765–806, 2022.
+[23] R. J. G. B. Campello, D. Moulavi, and J. Sander, "Density-based clustering based on hierarchical density estimates," in Proc. Pacific-Asia Conf. Knowledge Discovery and Data Mining (PAKDD), 2013, pp. 160–172.
+-[24] D. Q. Nguyen, T. Vu, and A. T. Nguyen, "BERTweet: A pre-trained language model for English tweets," in Proc. Conf. Empirical Methods in Natural Language Processing: System Demonstrations, 2020, pp. 9–14.
+
+
+
+
+================================================================================
+APPENDIX A
+DEFINITIONS, ACRONYMS AND ABBREVIATIONS
+================================================================================
+
+ACRONYMS AND ABBREVIATIONS
+
+API – Application Programming Interface
+A set of rules and endpoints that allows different software components to communicate. The backend of this system exposes its functions through a REST API built with FastAPI.
+
+NLP – Natural Language Processing
+A field of artificial intelligence concerned with enabling computers to understand and process human language.
+
+XLM-R – Cross-lingual Language Model – RoBERTa
+A transformer model pretrained on text in 100 languages. It is the base model for the language, disaster, sentiment and need classifiers in this system.
+
+mBERT – Multilingual BERT
+A version of BERT pretrained on text in many languages, used in several of the surveyed studies.
+
+MuRIL – Multilingual Representations for Indian Languages
+A BERT-based model pretrained on Indian languages. It was trained as an alternative sentiment model and compared with XLM-R.
+
+IndicSBERT
+A sentence-embedding model for Indian languages that places sentences with similar meanings close together, even across languages. It is used to group related posts into clusters.
+
+IndicTrans2
+A machine translation model for the 22 scheduled languages of India. It was used to translate English training data into Hindi, Kannada, Tamil and Telugu.
+
+HDBSCAN – Hierarchical Density-Based Spatial Clustering of Applications with Noise
+A clustering algorithm that finds groups of different densities. It is used to merge clusters that have become similar over time.
+
+LSTM – Long Short-Term Memory
+A recurrent neural network that captures long-range dependencies in sequences, used by several of the surveyed studies.
+
+TF-IDF – Term Frequency – Inverse Document Frequency
+A statistical measure of how important a word is to a document within a collection of documents.
+
+F1 Score
+The harmonic mean of precision and recall. Macro-F1 averages the F1 score of each class equally, and micro-F1 calculates it from the pooled counts of all classes.
+
+PII – Personally Identifiable Information
+Information that can identify a person, such as a phone number or an email address. It is masked before evidence is stored.
+
+
+TERMS
+
+Code-Mixing
+The use of two or more languages within the same sentence or conversation, for example Hindi and English in one post.
+
+Romanised Text
+Text in an Indian language written in the Latin alphabet instead of its native script, for example Hindi written as "madad chahiye".
+
+Sentiment
+The emotional tone of a text. It is often divided into positive, negative and neutral classes; this system classifies posts as negative or positive and uses the negative probability in scoring.
+
+Need Detection
+The identification of help requests or actionable needs in a post. In this system each post can indicate needs for several departments at once.
+
+Situation
+A group of three or more related posts that describe the same real-world event. Situations, not individual posts, are scored, reviewed and routed.
+
+Priority Score
+A value between 0 and 1 calculated from severity, actionability, corroboration, credibility and recency. It places each situation in the Critical, High, Medium or Low band.
+
+Fake Score
+A value between 0 and 1 calculated from low credibility, content risk and amplification risk. It estimates how likely a situation is to be misinformation.
+
+Auto-Escalation
+The automatic routing of a Critical or High situation to its departments when no reviewer acts within the configured time.
+
+Ticket
+A work item opened for a department when a situation is routed. A department acknowledges and then resolves each ticket.

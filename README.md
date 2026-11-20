@@ -1,25 +1,49 @@
 # Multilingual Sentiment & Need Detection for Real-Time Crisis Monitoring and Departmental Routing
 
-**Capstone Project 160** · UE23CS320A/B · Guide: Dr. Saritha
+**Capstone Project 160** · Guide: Dr. Saritha
 
 A real-time, multilingual system that analyzes social media posts during crises and emergencies to detect **sentiment**, **urgent needs**, and **fake/misleading content**, then routes verified, prioritized alerts to the appropriate government department (Disaster Management, Healthcare, Law & Order, Public Safety, Transportation, and Public Municipal).
 
 ## Problem Statement
 
-During crises, people share information, emotions, and help requests on social media in multiple languages — often with sarcasm, code-mixing, and mixed sentiment that make automated analysis hard. Existing sentiment analysis tools are largely English-only, don't detect actual *needs*, can't tell credible posts from misinformation, and offer no automated routing to the departments that need to act. This leads to delayed, inefficient crisis response.
+During crises, people share information, emotions, and help requests on social media in multiple languages — often with code-mixing and mixed sentiment that make automated analysis hard. Existing sentiment analysis tools are largely English-only, don't detect actual *needs*, can't tell credible posts from misinformation, and offer no automated routing to the departments that need to act. This leads to delayed, inefficient crisis response.
 
 This project builds a real-time multilingual pipeline that detects sentiment and needs from social media data, scores posts for credibility and priority, and routes them to the relevant department for timely action — with a human reviewer in the loop before anything is dispatched.
 
 ## Objectives
 
-- Real-time multilingual social media analysis (including low-resource and code-mixed languages)
-- Joint sentiment and need detection
-- Sarcasm and complex-language handling that can flip a post's meaning
-- Fake news / misinformation detection and credibility scoring
-- Priority and severity scoring so the most urgent posts surface first
-- Situation summarization and evidence extraction (top supporting posts + metadata)
-- Human-validated automatic departmental routing
-- Dashboard-based monitoring, trends, heatmaps, and reports
+*Why we are building this: the outcomes the system should deliver.*
+
+1. **Include every language people use.** Crisis posts in Indian languages, including romanised and code-mixed text, should be understood and not ignored because they are not in English.
+2. **Turn reactions into actionable needs.** The system should find out what help people are asking for and which department should provide it, not only how they feel.
+3. **Keep rumours from triggering a response.** The system should estimate how likely a report is to be misinformation, so responders do not act on rumours.
+4. **Put the most urgent situations first.** Situations should be ranked by an explainable priority, so limited response capacity goes where it is needed most.
+5. **Reduce the reviewer's workload.** Many posts about one event should become one situation with a summary and evidence, so reviewers verify an event once instead of reading every post.
+6. **Keep humans in control without delaying urgent cases.** Every alert should be confirmed by a person before routing, but urgent situations should not wait indefinitely in the review queue.
+7. **Give departments a clear view of the crisis.** Departments should be able to see trends, workload and response times to plan their response.
+
+## Scope
+
+*What exactly the project builds, and where it stops.*
+
+**In scope**
+
+- **Languages:** English, Hindi, Kannada, Tamil and Telugu, in native script or romanised; code-mixed posts are flagged.
+- **Input:** text-only social media posts, streamed from a CSV simulator into an in-memory queue.
+- **Post analysis:** cleaning, repost detection, language detection, disaster filtering, sentiment (negative/positive) and multi-label need detection (healthcare, municipal, law, tourism).
+- **Situations:** related posts, including posts in different languages, are grouped with IndicSBERT embeddings. A cluster becomes a situation once it has three or more posts.
+- **Scoring and evidence:** an explainable priority score (Critical / High / Medium / Low) and a formula-based fake score for each situation. Each situation also gets a template summary in all five languages and its top supporting posts, with personal details masked.
+- **Validation and routing:** a reviewer console (Approve / Mark Fake / Skip) and one ticket per relevant department: Healthcare, Public Municipal, Law & Order or Tourism, with Disaster Management as the fallback. Critical situations are auto-escalated after 1 minute and High after 5 minutes if no one reviews them.
+- **Monitoring:** a live dashboard with trends, heatmaps (department × hour, need × language), department workload and daily reports.
+
+**Out of scope**
+
+- Images, video and audio in posts.
+- Languages other than the five listed above.
+- A trained fake-news classifier. The fake score is an explainable formula over credibility, content risk and amplification.
+- Geographic mapping. Place names are extracted from the post text, but posts are not geocoded or shown on a map.
+- Connecting directly to live platform APIs or to real government systems. The system raises tickets but does not dispatch responders.
+- Production deployment concerns: a persistent message broker, per-department logins and access control.
 
 ## Architecture
 
@@ -75,15 +99,17 @@ The system is organized into five layers: **Ingestion → Preprocessing → AI A
 | Disaster / crisis classification | Fine-tuned **BERTweet-base** |
 | Need detection | Multi-label **XLM-R** classifier (Healthcare, Law, Public Services, Tourism, …), zero-shot NLI fallback |
 | Department routing | Zero-shot **BART-large-MNLI**, and an **SBERT**-based semantic similarity + keyword-boost classifier |
-| Fake news / credibility | Hybrid: XLM-R fake-probability model + credibility score (account age, followers, verified) + content-risk detection |
+| Fake news / credibility | Rule-based formula: credibility + content risk (forwarding, hearsay, writing style) + copy-paste amplification risk |
 | Summarization | **mT5** |
 | Evidence ranking | Sentence embeddings (Sentence-BERT / LaBSE) + similarity-to-priority weighted ranking |
 
 **Scoring formulas**
 
-- **Priority score** = 0.35 × Need Severity + 0.25 × Sentiment + 0.2 × Urgency (keyword-based) + 0.1 × Credibility + 0.1 × Recency
-- **Fake score** = 0.5 × Model Prediction + 0.3 × (1 − Credibility) + 0.2 × Content Risk
-- **Credibility** = 0.4 × Account Age + 0.4 × Followers + 0.2 × Verified
+- **Priority score** = 0.30 × Severity + 0.25 × Actionability + 0.20 × Corroboration + 0.15 × Credibility + 0.10 × Recency
+- **Fake score** = 0.385 × (1 − Credibility) + 0.230 × Content Risk + 0.385 × Amplification Risk
+- **Credibility** = 0.35 × Cluster Consistency + 0.30 × Text Quality + 0.20 × Model Confidence + 0.15 × Specificity
+- **Content risk** = 0.50 × Forward-Chain Keywords + 0.25 × Hearsay Keywords + 0.25 × Writing Style
+- **Amplification risk** = 0.45 × Duplicate Ratio + 0.30 × Copy Burst + 0.25 × Forward Ratio
 
 **Stack:** Python, PyTorch, Hugging Face Transformers, Sentence-Transformers, scikit-learn, Pandas/NumPy, FastAPI (ingestion/queue services), MongoDB (storage).
 
@@ -93,7 +119,6 @@ The system is organized into five layers: **Ingestion → Preprocessing → AI A
 |---|---|
 | [XNLI](https://github.com/facebookresearch/XNLI) | Multilingual semantic foundation / cross-lingual pretraining |
 | [CrisisLex T15](https://crisislex.org/data-collections.html) | Actionable need detection (disaster-related labeled tweets) |
-| [News Headlines Sarcasm Dataset](https://www.kaggle.com/datasets/rmisra/news-headlines-dataset-for-sarcasm-detection) | Sarcasm detection |
 | [DravidianCodeMix](https://github.com/bharathichezhiyan/DravidianCodeMix-Dataset) | Code-mixed language identification (Tamil/Malayalam/Kannada-English) |
 | SentiMix (SemEval-2020) | Code-mixed sentiment (Hinglish) |
 | Disaster Tweets (Kaggle) | Disaster vs. non-disaster tweet classification |

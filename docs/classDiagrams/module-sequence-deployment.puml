@@ -202,7 +202,6 @@
  Disaster --> Models
  Needs --> Models
  Sentiment --> Models
- FakeNews --> Models
  Models --> Torch
 @enduml
 

@@ -1,0 +1,150 @@
+'' Low-level design diagrams referenced in report Chapter 5 (Figures 5.7-5.9).
+'' Each @startuml/@enduml block is a separate diagram. In draw.io, copy one
+'' block at a time into Arrange -> Insert -> Advanced -> PlantUML.
+'' Source of truth: backend/app/schemas/situations.py, schemas/routing.py,
+'' pipeline/escalation.py, pipeline/tickets.py, app/db.py.
+
+@startuml SituationLifecycle
+title Situation Lifecycle (Figure 5.7)
+hide empty description
+
+[*] --> pending : cluster reaches\nmin size (3 posts)
+
+pending : escalation_due_at set\nif band is Critical (1 min)\nor High (5 min)
+pending --> pending : rescored on new posts\n(scores, summary, evidence;\nreview state untouched)
+
+pending --> confirmed : reviewer approves\n/ verified tickets opened
+pending --> fake : reviewer marks fake\n/ tickets opened, unverified,\nflagged "fake"
+pending --> rejected : reviewer rejects\n/ open tickets cancelled
+pending --> auto_routed : deadline passed and\nnot likely fake\n/ unverified tickets opened
+
+auto_routed : still in the review queue
+auto_routed --> confirmed : reviewer approves\n/ tickets become verified
+auto_routed --> fake : reviewer marks fake
+auto_routed --> rejected : reviewer rejects\n/ tickets cancelled
+
+confirmed --> [*]
+fake --> [*]
+rejected --> [*]
+
+note right of pending
+  Every reviewer decision is also
+  stored in "verdicts" with a frozen
+  snapshot of the scores.
+end note
+@enduml
+
+
+@startuml TicketLifecycle
+title Routing Ticket Lifecycle (Figure 5.8)
+hide empty description
+
+[*] --> routed : situation approved / marked fake\nor auto-escalated\n(one ticket per department)
+
+routed --> acknowledged : department officer\nacknowledges
+routed --> resolved : department officer\nresolves
+acknowledged --> resolved : department officer\nresolves
+
+routed --> cancelled : situation rejected
+acknowledged --> cancelled : situation rejected
+cancelled --> routed : situation approved again\n(ticket reopened)
+
+resolved --> [*]
+
+note bottom of routed
+  Each transition is appended to
+  history as {status, by, at}.
+  Rescoring updates queue_priority
+  and band of open tickets.
+end note
+@enduml
+
+
+@startuml Collections
+title MongoDB Collections (Figure 5.9)
+hide circle
+skinparam linetype ortho
+
+entity clusters {
+  * id : string <<unique>>
+  --
+  centroid : bytes (float32)
+  dim : int
+  size : int
+  tweet_ids : string[]
+  dept_relevance : map
+  created_at / last_updated_at : float
+  active : bool
+}
+
+entity tweets {
+  * id : string <<unique>>
+  --
+  cluster_id : string <<FK>>
+  text (masked) / text_raw (masked)
+  lang, is_romanized, is_code_mixed
+  disaster_confidence, sentiment_*, needs
+  severity, actionability
+  embedding : bytes
+  metadata (pseudonymised)
+  created_at, processed_at
+}
+
+entity dropped_tweets {
+  * id : string
+  --
+  tweet_id : string
+  text (masked)
+  reason : invalid | repost | not_disaster
+  detail : map
+  dropped_at : float
+  expires_at : date <<TTL 7 days>>
+}
+
+entity situations {
+  * id : string <<unique>>
+  --
+  cluster_id : string <<FK, unique>>
+  status : pending | auto_routed | confirmed | fake | rejected
+  priority : {priority_score, band, severity, ...}
+  fake_news : {fake_score, likely_fake, credibility, ...}
+  needs, department
+  summary, summary_i18n
+  evidence_posts[], representative
+  score_history[] (last 20)
+  escalation_due_at, decided_at, routed_at
+}
+
+entity verdicts {
+  * id : string
+  --
+  situation_id : string <<FK>>
+  decision : approve | reject | fake
+  snapshot : {priority, fake_news, needs, ...}
+  decided_at : float
+}
+
+entity routing_tickets {
+  * id : string <<unique>>
+  --
+  situation_id : string <<FK>>
+  department : string
+  (situation_id, department) <<unique>>
+  status : routed | acknowledged | resolved | cancelled
+  queue_priority, band
+  verified : bool
+  reviewer_flag
+  history[] : {status, by, at}
+}
+
+entity daily_reports {
+  * id : date (IST) <<unique>>
+  --
+  report contents
+}
+
+clusters ||--|| situations : promoted to
+clusters ||--o{ tweets : groups
+situations ||--o{ verdicts : decided by
+situations ||--o{ routing_tickets : routed as
+@enduml
