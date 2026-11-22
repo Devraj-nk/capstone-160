@@ -7,155 +7,24 @@
 ' ============================================================================
 
 @startuml SystemSequence
- title End-to-End System Sequence Diagram
- autonumber
- hide footbox
- skinparam shadowing false
- skinparam sequenceMessageAlign center
+title End-to-End System Sequence
+autonumber
+hide footbox
+actor "Data Source" as Src
+actor Reviewer as Rev
+participant "FastAPI Backend" as API
+participant "Pipeline Worker" as P
+database MongoDB as DB
 
- actor "CSV Producer" as DataSimulator
- actor "Pipeline Client" as PipelineClient
- actor "Human Reviewer" as Reviewer
-
- box "Presentation Layer" #E8F1FF
-   participant "React Frontend" as Frontend
-   participant "API Client" as APIClient
- end box
-
- box "Orchestration Layer" #FFF2CC
-   participant "FastAPI Application" as FastAPIApp
-   participant "Ingestion Router" as IngestionRouter
-   participant "Processing Router" as ProcessingRouter
-   participant "Situation Router" as SituationRouter
- end box
-
- box "Input Processing Module" #E2F0D9
-   participant "Queue Manager" as QueueManager
-   participant "Preprocessor" as Preprocessor
-   participant "Language Detector" as LanguageDetector
- end box
-
- box "Analysis Module" #FCE4D6
-   participant "Analysis Engine" as AnalysisEngine
-   participant "Analysis Models" as AnalysisModels
- end box
-
- box "Clustering Module" #E4DFEC
-   participant "Cluster Manager" as ClusterManager
- end box
-
- box "Situation Module" #DDEBF7
-   participant "Situation Manager" as SituationManager
-   participant "Summarizer" as Summarizer
- end box
-
- box "Evidence Module" #F4CCCC
-   participant "Evidence Manager" as EvidenceManager
- end box
-
- database "MongoDB" as MongoDB
-
- == Ingestion ==
- DataSimulator -> FastAPIApp : POST /ingestion/ingest
- activate FastAPIApp
- FastAPIApp -> IngestionRouter : route raw event
- activate IngestionRouter
- IngestionRouter -> QueueManager : enqueue(queue item)
- QueueManager --> IngestionRouter : enqueue response
- IngestionRouter --> FastAPIApp : ingestion response
- deactivate IngestionRouter
- FastAPIApp --> DataSimulator : HTTP 200 / ingestion result
- deactivate FastAPIApp
-
- == Processing and analysis ==
- PipelineClient -> FastAPIApp : request pipeline processing
- activate FastAPIApp
- FastAPIApp -> ProcessingRouter : route preprocessing request
- activate ProcessingRouter
- ProcessingRouter -> QueueManager : dequeue()
- QueueManager --> ProcessingRouter : queued event
- ProcessingRouter -> Preprocessor : clean and validate text
- Preprocessor -> LanguageDetector : detect language and script
- LanguageDetector --> Preprocessor : language information
- Preprocessor --> ProcessingRouter : preprocessing result
- ProcessingRouter -> AnalysisEngine : analyze processed post
- activate AnalysisEngine
- AnalysisEngine -> AnalysisModels : classify and score text
- AnalysisModels --> AnalysisEngine : analysis outputs
- AnalysisEngine --> ProcessingRouter : combined analysis result
- deactivate AnalysisEngine
- ProcessingRouter --> FastAPIApp : analysis response
- deactivate ProcessingRouter
- FastAPIApp --> PipelineClient : processed analysis result
- deactivate FastAPIApp
-
- == Clustering, situation, and evidence ==
- PipelineClient -> FastAPIApp : submit analysis result
- activate FastAPIApp
- FastAPIApp -> ClusterManager : assign result to cluster
- activate ClusterManager
- ClusterManager --> FastAPIApp : cluster assignment
- deactivate ClusterManager
-
- FastAPIApp -> SituationManager : create significant situation
- activate SituationManager
- SituationManager -> Summarizer : generate summary
- Summarizer --> SituationManager : situation summary
- SituationManager -> MongoDB : store situation
- MongoDB --> SituationManager : stored situation ID
- SituationManager --> FastAPIApp : situation created
- deactivate SituationManager
-
- FastAPIApp -> EvidenceManager : extract supporting evidence
- activate EvidenceManager
- EvidenceManager -> MongoDB : store protected evidence
- MongoDB --> EvidenceManager : stored evidence IDs
- EvidenceManager --> FastAPIApp : evidence response
- deactivate EvidenceManager
- FastAPIApp --> PipelineClient : situation and evidence result
- deactivate FastAPIApp
-
- == Human review and dashboard ==
- Reviewer -> Frontend : open review or dashboard page
- Frontend -> APIClient : request situations or analytics
- APIClient -> FastAPIApp : HTTP request
- activate FastAPIApp
- FastAPIApp -> SituationRouter : route situation request
- activate SituationRouter
- SituationRouter -> MongoDB : query or update situations
- MongoDB --> SituationRouter : situation data
- SituationRouter --> FastAPIApp : JSON response
- deactivate SituationRouter
- FastAPIApp --> APIClient : HTTP JSON response
- deactivate FastAPIApp
- APIClient --> Frontend : parsed response
- Frontend --> Reviewer : display results
-
- alt Reviewer approves a situation
-   Reviewer -> Frontend : approve situation
-   Frontend -> APIClient : POST decision(approve)
-   APIClient -> FastAPIApp : POST /situations/{id}/decision
-   FastAPIApp -> SituationRouter : record approval
-   SituationRouter -> MongoDB : update status to confirmed
-   MongoDB --> SituationRouter : update result
-   SituationRouter --> APIClient : updated situation
-   APIClient --> Frontend : refresh review list
- else Reviewer rejects a situation
-   Reviewer -> Frontend : reject situation
-   Frontend -> APIClient : POST decision(reject)
-   APIClient -> FastAPIApp : POST /situations/{id}/decision
-   FastAPIApp -> SituationRouter : record rejection
-   SituationRouter -> MongoDB : update status to rejected
-   MongoDB --> SituationRouter : update result
-   SituationRouter --> APIClient : updated situation
-   APIClient --> Frontend : refresh review list
- end
-
- note over FastAPIApp
- All backend modules run inside one FastAPI process.
- The arrows between backend modules represent function or
- module calls, not separate network connections.
- end note
+Src -> API : POST /ingestion/ingest
+API -> P : enqueue post
+P -> P : clean, detect language, filter,\nanalyse, cluster, score
+P -> DB : save situation + evidence
+Rev -> API : GET /situations
+API -> DB : fetch pending by priority
+Rev -> API : POST /situations/{id}/decision
+API -> DB : update status, open tickets
+note over P, DB : Critical/High auto-routed after 1/5 min unless likely fake
 @enduml
 
 

@@ -379,7 +379,7 @@ Each score is a weighted sum of terms between 0 and 1, and a missing term is ski
 
 Scoring was validated on synthetic scenarios in which the expected outcome was fixed in advance:
 •	Priority: 52 synthetic clusters were categorized into priority bands using a written rubric before scoring. These clusters were split into 30 in the tuning sample and 22 in the holdout sample. 
-•	Various weight combinations were considered but the agreed weight combination was maintained since the weights that performed well in the tuning sample failed to outperform them in the holdout sample.
+•	The final formula was compared with the base formula and with the best combination found by a search over weights. The weight search fitted the tuning sample but fell to 50% on the holdout sample, so the final formula was kept.
 •	Fake score: the fake score was tested on 52 genuine scenarios, 10 difficult genuine clusters (such as real emergencies that ask people to share) and 21 rumour clusters.
 These results show that the scoring works as intended. They cannot be used as a replacement for testing against practical judgements, since the scenarios and model outputs were created by the team developing the project.
 6.6 System integration
@@ -397,7 +397,7 @@ Sentiment Model	Held-out test set (18,540 rows)	Accuracy, precision, recall, F1,
 Language Model	Held-out test set (18,540 rows)	Accuracy, macro F1, per-language results, confusion matrix
 Clustering	Calibration pairs and scenario tests	Same-event and different-event similarity; pass/fail scenarios
 Priority Score	52 rubric-labelled synthetic scenarios	Exact band match, match within one band
-Fake Score	83 synthetic clusters	Precision, recall and F1 across thresholds
+Fake Score	83 synthetic clusters	Fake-score range of genuine and rumour groups
 Complete System	Automated test suite (165 tests)	Unit, integration and end-to-end pass rate
 
 
@@ -724,33 +724,34 @@ Micro Average	0.70	0.78	0.73	313
 Macro Average	0.63	0.71	0.67	313
 
 8.3 Clustering and Scoring Results
-Clustering. The incremental clustering module passed all six functional scenarios: merging posts about one event, separating unrelated events, respecting the 48-hour window, merging English and Tamil reports of one flood, holding back small clusters, and running the HDBSCAN correction step. During calibration, same-event pairs had a mean cosine similarity of 0.51 and the different-event pair scored 0.08. Testing also exposed a department-overlap rule that wrongly blocked a flood report describing health effects, and the rule was corrected. These scenarios confirm correct behaviour, but clustering quality was not measured on a labelled dataset.
-Priority score. The formula was evaluated on 52 synthetic situations whose expected bands were fixed in advance by a written rubric, with 30 used for tuning and 22 held out. Table 8.4 compares the expected band of each held-out situation with the band predicted by the formula; correct placements lie on the diagonal. The final formula placed 54.5% of held-out situations in the exact band and all of them within one band. The Spearman correlation between priority and expected urgency across all 52 situations was 0.85, so the formula orders situations well even when a band boundary is missed. A search over weight combinations did not produce a more reliable formula: the best weights on the tuning set reached only 50% on the held-out set, and five-fold cross-validation averaged 54% for the final weights against 48% for tuned weights. Two of the four Critical situations were placed in the High band, so the Critical boundary remains conservative.
+Clustering. The incremental clustering module passed all six functional scenarios: merging posts about one event, separating unrelated events, respecting the 48-hour window, merging English and Tamil reports of one flood, holding back small clusters, and running the HDBSCAN correction step. During calibration, same-event pairs had a mean cosine similarity of 0.51 and the different-event pair scored 0.08. Testing also exposed a department-overlap rule that wrongly blocked a flood report describing health effects, and the rule was corrected. Clustering quality was also measured on 46 labelled demo posts covering seven events in five languages, together with off-topic and spam posts. On the 37 posts that reached clustering, the Adjusted Rand Index (ARI) was 0.756 and the Adjusted Mutual Information (AMI) was 0.784. No cluster mixed two events; the scores are lowered by events split into several clusters, most clearly four pothole reports that stayed separate.
+Priority score. The formula was evaluated on 52 synthetic situations whose expected bands were fixed in advance by a written rubric, with 30 used for tuning and 22 held out. Table 8.4 compares three versions of the formula: the base formula, the final formula used in the system, and the best combination found by a search over weights. The final formula placed 80% of tuning situations and 73% of held-out situations in the exact expected band, and 95% of held-out situations within one band. The base formula reached 73% on the tuning sample but only 50% on the held-out sample. The weight search performed worse on both samples (67% and 50%), which shows that fitting weights to 30 scenarios overfits rather than improves the formula.
 
-Table 8.4: Priority Band Confusion Matrix (Held-Out Set, n = 22)
-Expected Band	Predicted Critical	Predicted High	Predicted Medium	Predicted Low
-Critical	2	2	0	0
-High	0	5	3	0
-Medium	0	2	4	0
-Low	0	0	3	1
+Table 8.4: Priority Band Accuracy of Formula Versions (52 Synthetic Situations)
+Formula Version	Tuning (n = 30)	Held-Out (n = 22)	Held-Out Within One Band
+Base	73%	50%	91%
+Final (In Use)	80%	73%	95%
+Best of Weight Search	67%	50%	93%
 
- 
-Fake score. The formula was tested on 83 artificial situations: 62 genuine and 21 rumours. The former has scores from 0.02 to 0.30 and therefore generates no false alarms for any threshold in Table 8.5. But the top score for rumours is 0.59, barely under the flag threshold of 0.60, and so no rumour would be flagged by the algorithm at that value. At the value of 0.40, however, 52 percent of rumours would be flagged without any false alarms. Chains of copy-pastes and forward translations are readily distinguished, but hearsay and calm rumours got scores from 0.14 to 0.28, identical to those of the genuine news. Table 8.5 shows how many rumours are caught and how many false alarms are raised at each flag threshold.
+ Formula Version	Tuning (n = 30)	Held-Out (n = 22)	Held-Out Within One Band
+Base	73%	50%	91%
+Final (In Use)	80%	73%	95%
+Best of Weight Search	67%	50%	93%
 
-Table 8.5: Fake Score Threshold Analysis (62 Genuine, 21 Rumours)
-Threshold	Rumours Caught	False Alarms	Precision	Recall	F1-Score
-0.40	11	0	100%	52%	0.69
-0.45	11	0	100%	52%	0.69
-0.50	7	0	100%	33%	0.50
-0.55	5	0	100%	24%	0.38
-0.60 (In Use)	0	0	–	0%	0.00
+Fake score. The formula was tested on 83 synthetic situations: 62 genuine situations, including real emergencies that ask people to share, and 21 rumours. Table 8.5 gives the range of fake scores for each group. All genuine situations scored between 0.04 and 0.30, while copy-paste rumours scored 0.55–0.60 and the same rumour forwarded in two or three languages scored 0.49–0.52. Every rumour therefore scored higher than every genuine situation, so the formula separates the two groups with a clear margin. However, the rumours lie at or just below the flag threshold of 0.60 used in the system, so most of them would not be marked as likely fake. Any threshold between 0.30 and 0.49 would flag all rumours in this test without a false alarm, but the threshold should be chosen using real reviewer decisions rather than synthetic data.
+
+Table 8.5: Fake Score Ranges by Group (Synthetic Situations)
+Group	Fake Score Range
+Genuine (all 62)	0.04 – 0.30
+Copy-paste rumours ("forward to all")	0.55 – 0.60
+Same rumour forwarded in 2–3 languages	0.49 – 0.52
 
 System testing. All 165 automated test cases passed. In the model-free test configuration, processing 300 posts added a pipeline overhead of 3.1 ms per post, and read APIs had a median response time of 9.6 ms. These timings exclude model inference.
 
 8.4 Discussion
-Closest available studies cover one of the steps and are based on different datasets, languages, and labels, so their results serve as a reference point rather than a direct comparison. Algiriyage et al. [5] get an F1 score of about 0.92 using a Bi-LSTM with 192K English tweets to detect disaster, while PIDMUS [10] achieves 81.36% accuracy in English and 86.75% in Turkish. The disaster filter of this project detects disasters with 86.11% to 90.56% accuracy in five languages, getting F1 scores from 0.615 to 0.733. In need detection, Ray Chowdhury et al. [7] achieve micro-F1 between 79.84 to 87.44 on mostly English and European tweets. The project micro-F1 of 0.73 is somewhat worse because of the need to work with five languages in one model. IndicLID [9] achieves 98.55% accuracy on the native script but 80.40% on the romanised text, which confirms that the romanised text is a more difficult task in terms of language detection. Ray et al. [13] use a similar incremental thresholding approach in clustering and prioritisation; CURD [14] classifies the urgency with F1 score of 0.88, while EventHunter [15] ranks events with a weighted score qualitatively estimated.
+Closest available studies cover one of the steps and are based on different datasets, languages, and labels, so their results serve as a reference point rather than a direct comparison. Algiriyage et al. [5] get an F1 score of about 0.92 using a Bi-LSTM with 192K English tweets to detect disaster, while PIDMUS [10] achieves 81.36% accuracy in English and 86.75% in Turkish. The disaster filter of this project detects disasters with 86.11% to 90.56% accuracy in five languages, getting F1 scores from 0.615 to 0.733. In need detection, Ray Chowdhury et al. [7] achieve micro-F1 between 79.84 to 87.44 on mostly English and European tweets. The project micro-F1 of 0.73 is somewhat worse because of the need to work with five languages in one model. IndicLID [9] achieves 98.55% accuracy on the native script but 80.40% on the romanised text, which confirms that the romanised text is a more difficult task in terms of language detection. Ray et al. [13] use a similar incremental thresholding approach in clustering and prioritisation and report an ARI of 0.63 and AMI of 0.86 on 503 English events, against 0.76 and 0.78 for this project on seven multilingual events; CURD [14] classifies the urgency with F1 score of 0.88, while EventHunter [15] ranks events with a weighted score qualitatively estimated. For misinformation, Ma et al. [25] detect rumours with a recurrent neural network at 88.1% accuracy on 992 Twitter events and 91.0% on Weibo, but their model needs labelled rumour events and the full spread of each story. The fake score in this project needs no labelled data, but in the synthetic tests it separated only copy-paste and translated-forward rumours from genuine reports.
 This project seeks to fill the gap between what these existing works have achieved, which is the gap of integration. Works in Indian languages, like Das et al. [8], only go as far as classification, while clustering and ranking systems [13], [14], [15] and multi-label crisis classifiers such as CrisisSense-LLM [12] work on English posts. In neither case have any of the works under survey taken a post from an Indian language and reached a situation score and review of tickets by a department.
-Limitations of the proposed system include a poor need detection mechanism for languages other than English, where macro-F1 lies in the range 0.376 – 0.553. This means that Indic tweets will not be classified into the right departments. The Indic training set is translated by machines, and two hand-written Hindi and Kannada flood messages were missed. This confirms the work done by Rahul and Adebayo [11], where the XLM-R model accuracy reduced from 99.7% to 42.5% with increased difficulty of test cases. Romanised and code-mixed posts were not evaluated separately. The fake-score threshold of 0.60 raised no false alarms but also caught none of the 21 synthetic rumours. Both scoring formulas were verified using synthetic cases only, and clustering was tested only through six scenarios. Finally, the system replays a CSV file instead of reading live social media, so its performance under real traffic is untested.
+Limitations of the proposed system include a poor need detection mechanism for languages other than English, where macro-F1 lies in the range 0.376 – 0.553. This means that Indic tweets will not be classified into the right departments. The Indic training set is translated by machines, and two hand-written Hindi and Kannada flood messages were missed. This confirms the work done by Rahul and Adebayo [11], where the XLM-R model accuracy reduced from 99.7% to 42.5% with increased difficulty of test cases. Romanised and code-mixed posts were not evaluated separately. The fake score separated rumours from genuine situations, but the rumours scored 0.49–0.60, at or just below the 0.60 flag, so most would not be flagged at the current threshold. Both scoring formulas were verified using synthetic cases only, and clustering was evaluated only on six scenarios and 46 labelled demo posts. Finally, the system replays a CSV file instead of reading live social media, so its performance under real traffic is untested.
 ================================================================================
 CHAPTER 9
 CONCLUSION AND FUTURE WORK
@@ -763,7 +764,7 @@ This project set out to turn multilingual social media posts about a crisis into
 
 Each situation receives a priority score and a fake score calculated from explainable formulas. Every term in these formulas is visible to the reviewer, so the reason for a Critical band or a misinformation warning can be checked. A template-based summary is produced in all five languages, and the most representative posts are attached as evidence after personal details are masked. Human reviewers confirm each situation before routing, and a situation that concerns several departments opens a separate ticket for each one. Critical and High situations are routed automatically if no reviewer acts within the configured time, so urgent reports are not delayed by the review queue. Departments then acknowledge and resolve tickets, and the analytics dashboard and daily reports summarise response times, trends and workload.
 
-The four classifiers achieved 99.24% accuracy for language detection, 89.02% accuracy for the disaster filter, 82.75% accuracy for sentiment and a micro-F1 of 0.73 for need detection. The priority formula placed every held-out synthetic situation within one band of its expected level, with a rank correlation of 0.85. All 165 automated tests passed. These results show that a single pipeline can connect Indian-language posts to departmental action, which no surveyed work attempted. The results also show where the system is weakest: need detection outside English, models trained on machine-translated text, and a fake-score threshold that has not yet been tuned on real data.
+The four classifiers achieved 99.24% accuracy for language detection, 89.02% accuracy for the disaster filter, 82.75% accuracy for sentiment and a micro-F1 of 0.73 for need detection. The priority formula placed 73% of held-out synthetic situations in the exact expected band and 95% within one band, and the fake score placed every synthetic rumour above every genuine situation. All 165 automated tests passed. These results show that a single pipeline can connect Indian-language posts to departmental action, which no surveyed work attempted. The results also show where the system is weakest: need detection outside English, models trained on machine-translated text, and a fake-score threshold that has not yet been tuned on real data.
 
 Table 9.1 summarises the outcome of each project objective.
 
@@ -784,7 +785,7 @@ Table 9.1: Project Objectives and Outcomes
 
 The most important improvement concerns the training data. The disaster and need models should be retrained on posts written natively in Indian languages, including romanised and code-mixed text, instead of machine translations, with need detection outside English as the first priority. Romanised and code-mixed posts should also be evaluated separately. In addition, the system already supports per-language calibration of model confidence and of the disaster threshold, but neither has been fitted yet; fitting them on a validation set would make scores consistent across languages.
 
-The evaluation should also be strengthened. Clustering should be measured with ARI and AMI on a labelled event dataset, the HDBSCAN correction step should run on a fixed schedule, and the models should be tested on adversarial and real crisis posts as well as on held-out benchmark data. The fake-score threshold should likewise be re-tuned once real reviewer decisions are available.
+The evaluation should also be strengthened. Clustering should be measured with ARI and AMI on a larger labelled event dataset, the HDBSCAN correction step should run on a fixed schedule, and the models should be tested on adversarial and real crisis posts as well as on held-out benchmark data. The fake-score threshold should likewise be re-tuned once real reviewer decisions are available.
 
 Moving towards deployment requires live data and real users. The CSV simulator should be replaced by adapters for social media APIs, and the in-memory queue by a persistent message broker so that queued posts survive a restart. Department officers currently work through a shared dashboard; connecting real departments will require separate logins and authentication, so that each officer sees only their own department's tickets and every action is linked to an accountable user.
 
@@ -820,6 +821,7 @@ REFERENCES
 [22] B. R. Chakravarthi et al., "DravidianCodeMix: Sentiment analysis and offensive language identification dataset for Dravidian languages in code-mixed text," Language Resources and Evaluation, vol. 56, pp. 765–806, 2022.
 [23] R. J. G. B. Campello, D. Moulavi, and J. Sander, "Density-based clustering based on hierarchical density estimates," in Proc. Pacific-Asia Conf. Knowledge Discovery and Data Mining (PAKDD), 2013, pp. 160–172.
 -[24] D. Q. Nguyen, T. Vu, and A. T. Nguyen, "BERTweet: A pre-trained language model for English tweets," in Proc. Conf. Empirical Methods in Natural Language Processing: System Demonstrations, 2020, pp. 9–14.
+[25] J. Ma, W. Gao, P. Mitra, S. Kwon, B. J. Jansen, K.-F. Wong, and M. Cha, "Detecting rumors from microblogs with recurrent neural networks," in Proc. 25th Int. Joint Conf. Artificial Intelligence (IJCAI), 2016, pp. 3818–3824.
 
 
 
